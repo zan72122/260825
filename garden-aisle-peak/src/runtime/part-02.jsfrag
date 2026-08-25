@@ -1,0 +1,171 @@
+    for (let y = .78; y <= 1.32; y += .13) addCylinder(group, .012, .012, .49, [0, y, -.2], wood, 6, [0, 0, Math.PI / 2]);
+  } else if (kind === 'bentwood') {
+    const back = addRing(group, [0, 1.05, -.19], .28, .023, wood, [0, 0, 0]);
+    back.scale.y = 1.15;
+  } else if (kind === 'bamboo') {
+    addCylinder(group, .028, .028, .55, [0, 1.03, -.2], wood, 8, [0, 0, Math.PI / 2]);
+    for (let x = -.18; x <= .18; x += .12) cylinderBetween(group, [x, .73, -.2], [x, 1.31, -.2], .014, wood, 6);
+  } else if (kind === 'black') {
+    addBox(group, [.52, .07, .09], [0, 1.28, -.2], wood);
+    for (let x = -.19; x <= .19; x += .095) addCylinder(group, .01, .01, .52, [x, 1.0, -.2], wood, 6);
+  }
+  return group;
+}
+
+function buildTable(parent, position, options = {}) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  parent.add(group);
+  const width = options.width ?? 2.1;
+  const depth = options.depth ?? .78;
+  const top = material(options.color ?? 0x785a41, .82, 0, { map: options.map ?? null });
+  addBox(group, [width, .09, depth], [0, .76, 0], top);
+  [-width * .41, width * .41].forEach((x) => [-depth * .34, depth * .34].forEach((z) => addBox(group, [.08, .73, .08], [x, .365, z], top)));
+  return group;
+}
+
+function buildUrn(parent, position, options = {}) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  parent.add(group);
+  const mat = material(options.color ?? 0x8c8172, options.metal ? .36 : .86, options.metal ? .68 : 0);
+  addCylinder(group, .25, .35, .12, [0, .06, 0], mat, 28);
+  addCylinder(group, .11, .15, .34, [0, .28, 0], mat, 24);
+  addCylinder(group, .43, .17, .5, [0, .67, 0], mat, 32);
+  addCylinder(group, .48, .45, .08, [0, .95, 0], mat, 32);
+  return group;
+}
+
+function buildGlassBowl(parent, position, options = {}) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  parent.add(group);
+  const glass = material(options.color ?? 0xbfd0cc, .08, .04, { transparent: true, opacity: .32, depthWrite: false, side: THREE.DoubleSide });
+  const water = material(options.water ?? 0x769e9f, .08, .03, { transparent: true, opacity: .42, depthWrite: false });
+  addCylinder(group, .42, .28, .3, [0, .15, 0], glass, 32);
+  addCylinder(group, .35, .26, .035, [0, .25, 0], water, 32);
+  return group;
+}
+
+function buildLantern(parent, position, options = {}) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  parent.add(group);
+  const metal = material(options.color ?? 0x6a5436, .35, .68);
+  const glass = material(0xe6ddd0, .1, 0, { transparent: true, opacity: .18, depthWrite: false, side: THREE.DoubleSide });
+  const size = options.size ?? .56;
+  addBox(group, [size, .05, size], [0, .025, 0], metal);
+  addBox(group, [size, .05, size], [0, size * 1.45, 0], metal);
+  [[-.46,-.46],[-.46,.46],[.46,-.46],[.46,.46]].forEach(([x,z]) => addBox(group, [.035, size * 1.42, .035], [x * size, size * .72, z * size], metal));
+  addBox(group, [size * .83, size * 1.25, .012], [0, size * .72, size * .455], glass, [0,0,0], false);
+  addBox(group, [size * .83, size * 1.25, .012], [0, size * .72, -size * .455], glass, [0,0,0], false);
+  return group;
+}
+
+function buildCandle(parent, position, options = {}, animationState = null) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  parent.add(group);
+  const radius = options.radius ?? .055;
+  const height = options.height ?? .34;
+  const wax = material(options.wax ?? 0xeee5d4, .88);
+  addCylinder(group, radius, radius * 1.03, height, [0, height / 2, 0], wax, 16);
+  const flameMat = material(0xffc26b, .25, 0, { emissive: 0xff7d31, emissiveIntensity: 1.4 });
+  const flame = addSphere(group, .055, [0, height + .065, 0], flameMat, [.48, 1.0, .48], 8, false);
+  const light = new THREE.PointLight(0xffb16b, options.intensity ?? .42, 3.2, 2);
+  light.position.set(0, height + .1, 0);
+  group.add(light);
+  if (animationState) animationState.candles.push({ light, flame, phase: Math.random() * Math.PI * 2 });
+  return group;
+}
+
+function buildTree(parent, position, options = {}, animationState = null) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  group.scale.setScalar(options.scale ?? 1);
+  parent.add(group);
+  const trunk = material(options.trunk ?? 0x5e4633, .94);
+  const leaf = material(options.leaf ?? 0x40543a, .93);
+  const rand = seeded(options.seed ?? 1);
+  addCylinder(group, .18, .32, 4.0, [0, 2.0, 0], trunk, 12);
+  for (let i = 0; i < 9; i++) {
+    const angle = rand() * Math.PI * 2;
+    const start = new THREE.Vector3(0, 2.1 + rand() * 1.45, 0);
+    const end = new THREE.Vector3(Math.cos(angle) * (1.0 + rand() * 1.35), 3.2 + rand() * 2.0, Math.sin(angle) * (1.0 + rand() * 1.35));
+    cylinderBetween(group, start.toArray(), end.toArray(), .055 + rand() * .055, trunk, 9);
+    for (let j = 0; j < 2; j++) {
+      const p = start.clone().lerp(end, .65 + rand() * .35).add(new THREE.Vector3((rand() - .5) * .7, (rand() - .5) * .45, (rand() - .5) * .7));
+      const crown = addSphere(group, .78 + rand() * .55, p.toArray(), leaf, [1.35, .85, 1.05], 9);
+      if (animationState && i % 3 === 0) animationState.sway.push({ object: crown, amount: .008 + rand() * .008, phase: rand() * 6 });
+    }
+  }
+  return group;
+}
+
+function buildBareTree(parent, position, options = {}) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  group.scale.setScalar(options.scale ?? 1);
+  parent.add(group);
+  const bark = material(options.color ?? 0xc7c3b9, .92);
+  const rand = seeded(options.seed ?? 1);
+  addCylinder(group, .12, .23, 3.6, [0, 1.8, 0], bark, 10);
+  for (let i = 0; i < 12; i++) {
+    const angle = rand() * Math.PI * 2;
+    const start = new THREE.Vector3(0, 1.7 + rand() * 1.45, 0);
+    const mid = new THREE.Vector3(Math.cos(angle) * (.55 + rand() * .65), 3.0 + rand() * 1.0, Math.sin(angle) * (.55 + rand() * .65));
+    const end = mid.clone().add(new THREE.Vector3(Math.cos(angle + (rand() - .5)) * (.5 + rand() * .8), .45 + rand() * .9, Math.sin(angle + (rand() - .5)) * (.5 + rand() * .8)));
+    cylinderBetween(group, start.toArray(), mid.toArray(), .025 + rand() * .035, bark, 7);
+    cylinderBetween(group, mid.toArray(), end.toArray(), .012 + rand() * .018, bark, 6);
+  }
+  return group;
+}
+
+function buildBrickFacade(parent, registry, options = {}) {
+  const group = new THREE.Group();
+  group.position.set(0, 0, options.z ?? -16);
+  parent.add(group);
+  const brickTexture = canvasTexture(registry, 512, (ctx, size) => {
+    const rand = seeded(options.seed ?? 11);
+    ctx.fillStyle = options.tint ?? '#76503e';
+    ctx.fillRect(0, 0, size, size);
+    const rows = 15;
+    const h = size / rows;
+    const w = h * 2.1;
+    for (let row = 0; row < rows; row++) {
+      const offset = row % 2 ? -w / 2 : 0;
+      for (let x = offset; x < size; x += w) {
+        const delta = Math.floor((rand() - .5) * 22);
+        ctx.fillStyle = `rgb(${126 + delta},${77 + delta * .55},${56 + delta * .3})`;
+        ctx.fillRect(x + 2, row * h + 2, w - 4, h - 4);
+      }
+    }
+    ctx.strokeStyle = 'rgba(190,175,155,.72)';
+    ctx.lineWidth = 2;
+    for (let row = 0; row <= rows; row++) {
+      ctx.beginPath(); ctx.moveTo(0, row * h); ctx.lineTo(size, row * h); ctx.stroke();
+    }
+  }, [5, 2.3]);
+  const brick = material(0xffffff, .92, 0, { map: brickTexture });
+  addBox(group, [18, 6.8, .55], [0, 3.4, 0], brick);
+  const trim = material(options.trim ?? 0x8b8174, .9);
+  const glass = material(0x6f8790, .18, .05, { transparent: true, opacity: .72, depthWrite: false });
+  for (let x = -6.4; x <= 6.4; x += 3.2) {
+    addBox(group, [1.55, 2.55, .09], [x, 3.55, .32], glass, [0,0,0], false);
+    addBox(group, [1.78, .11, .16], [x, 2.23, .38], trim);
+    addBox(group, [.11, 2.78, .16], [x - .84, 3.55, .38], trim);
+    addBox(group, [.11, 2.78, .16], [x + .84, 3.55, .38], trim);
+    addBox(group, [.07, 2.48, .12], [x, 3.55, .4], trim);
+    addBox(group, [1.6, .07, .12], [x, 3.55, .4], trim);
+  }
+  addBox(group, [19, .22, .72], [0, 6.87, .02], trim);
+  return group;
+}
+
+function buildWovenBasket(parent, position, options = {}) {
+  const group = new THREE.Group();
+  group.position.set(...position);
+  parent.add(group);
+  const wicker = material(options.color ?? 0x9a754f, .96);
+  addCylinder(group, .36, .28, .46, [0, .23, 0], wicker, 18);
+  const handle = addRing(group, [0, .62, 0], .35, .025, wicker, [Math.PI / 2, 0, 0], Math.PI);
