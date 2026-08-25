@@ -1,0 +1,157 @@
+    this.stem(position.clone().add(n.clone().multiplyScalar(size*.08)),end,size*.025,spadixColor);
+  }
+
+  spike(base, height, colors, options = {}) {
+    const direction=(options.direction ?? new THREE.Vector3(0,1,0)).clone().normalize();
+    const end=base.clone().add(direction.clone().multiplyScalar(height));
+    this.stem(base,end,options.radius ?? .014,options.stemColor ?? this.stemColor);
+    const count=options.count ?? Math.floor(9+height*4);
+    const type=options.type ?? 'delphinium';
+    for(let i=0;i<count;i++) {
+      const t=(i+.5)/count;
+      const p=base.clone().lerp(end,t);
+      const angle=i*2.18;
+      const radial=(1-t)*height*.07+.025;
+      p.add(new THREE.Vector3(Math.cos(angle)*radial,0,Math.sin(angle)*radial));
+      const normal=new THREE.Vector3(Math.cos(angle)*.6,.15,Math.sin(angle)*.6+1).normalize();
+      const size=(type==='foxglove'?.15:.11)*(1-t*.35)*(options.scale ?? 1);
+      if(type==='foxglove') this.tulip(p,size,colors[i%colors.length],normal);
+      else this.daisy(p,size,colors[i%colors.length],0xc7aa65,normal,5);
+    }
+  }
+
+  wisteria(start, length, colors, options = {}) {
+    const count=options.count ?? Math.floor(12+length*5);
+    const end=start.clone().add(new THREE.Vector3(0,-length,0));
+    this.stem(start,end,options.radius ?? .009,options.stemColor ?? this.stemColor);
+    for(let i=0;i<count;i++) {
+      const t=(i+.5)/count;
+      const angle=i*2.25;
+      const radius=(1-t)*.18+.02;
+      const p=start.clone().lerp(end,t).add(new THREE.Vector3(Math.cos(angle)*radius,0,Math.sin(angle)*radius));
+      this.orchid(p,.13+(1-t)*.055,colors[i%colors.length],colors[(i+1)%colors.length],new THREE.Vector3(Math.cos(angle)*.3,-.1,1));
+    }
+  }
+
+  amaranthus(start, length, colors, options = {}) {
+    const count=options.count ?? Math.floor(20+length*10);
+    const end=start.clone().add(new THREE.Vector3((options.drift ?? 0)*.3,-length,(options.drift ?? 0)*.1));
+    this.stem(start,end,.012,options.stemColor ?? this.stemColor);
+    for(let i=0;i<count;i++) {
+      const t=i/Math.max(1,count-1);
+      const p=start.clone().lerp(end,t).add(new THREE.Vector3(Math.sin(i*1.7)*.03,0,Math.cos(i*1.31)*.03));
+      const c=colors[i%colors.length];
+      this.queue('amaranthus-bead',BEAD,c,p,new THREE.Quaternion(),new THREE.Vector3(.055,.085,.055),{roughness:.9});
+    }
+  }
+
+  blossomBranch(start, end, colors, options = {}) {
+    const branchColor=options.branchColor ?? 0x574235;
+    this.branch(start,end,options.radius ?? .028,branchColor);
+    const direction=end.clone().sub(start);
+    const count=options.count ?? 13;
+    for(let i=1;i<=count;i++) {
+      const t=i/(count+1);
+      const base=start.clone().addScaledVector(direction,t);
+      const side=new THREE.Vector3((this.rand()-.5)*.8,(this.rand()-.2)*.5,(this.rand()-.5)*.8);
+      const tip=base.clone().add(side.multiplyScalar(.45+this.rand()*.45));
+      this.branch(base,tip,.008+this.rand()*.009,branchColor);
+      const bloomCount=2+Math.floor(this.rand()*3);
+      for(let j=0;j<bloomCount;j++) {
+        const p=tip.clone().add(new THREE.Vector3((this.rand()-.5)*.17,(this.rand()-.5)*.17,(this.rand()-.5)*.17));
+        this.daisy(p,.11+this.rand()*.05,colors[Math.floor(this.rand()*colors.length)],0xd6b96d,new THREE.Vector3((this.rand()-.5)*.5,(this.rand()-.2)*.4,1),5);
+      }
+    }
+  }
+
+  meadowCluster(center, recipe, options = {}) {
+    const count=options.count ?? 30;
+    const width=options.width ?? 1.0;
+    const depth=options.depth ?? .65;
+    const height=options.height ?? .8;
+    const baseY=options.baseY ?? .03;
+    for(let i=0;i<count;i++) {
+      const angle=this.rand()*Math.PI*2;
+      const radius=Math.sqrt(this.rand());
+      const x=Math.cos(angle)*width*radius;
+      const z=Math.sin(angle)*depth*radius;
+      const stemHeight=height*(.34+this.rand()*.72)*(1-radius*.2);
+      const base=center.clone().add(new THREE.Vector3(x*.34,baseY,z*.34));
+      const top=center.clone().add(new THREE.Vector3(x,baseY+stemHeight,z));
+      this.stem(base,top,.008+this.rand()*.009);
+      const item=recipe[Math.floor(this.rand()*recipe.length)];
+      const normal=new THREE.Vector3((this.rand()-.5)*.5,.2+this.rand()*.5,1).normalize();
+      const size=(item.size ?? .24)*(.78+this.rand()*.4);
+      if(item.type==='rose') this.rose(top,size,item.color,normal);
+      else if(item.type==='peony') this.peony(top,size,item.color,normal);
+      else if(item.type==='ranunculus') this.ranunculus(top,size,item.color,normal);
+      else if(item.type==='daisy') this.daisy(top,size,item.color,item.center ?? 0xc4a04c,normal,item.petals ?? 9);
+      else if(item.type==='anemone') this.anemone(top,size,item.color,normal);
+      else if(item.type==='tulip') this.tulip(top,size,item.color,normal);
+      else if(item.type==='dahlia') this.dahlia(top,size,item.colors ?? [item.color],normal);
+      else if(item.type==='orchid') this.orchid(top,size,item.color,item.lip ?? item.color,normal);
+      else if(item.type==='calla') this.calla(top,size,item.color,item.spadix ?? 0xd4aa55,normal);
+      else this.rose(top,size,item.color,normal);
+      if(i%2===0) {
+        const p=base.clone().lerp(top,.34+this.rand()*.38);
+        this.leaf(p,.22+this.rand()*.19,i,normal,angle+this.rand(),.62+.3*this.rand());
+      }
+    }
+    for(let i=0;i<Math.ceil(count*.45);i++) {
+      const angle=this.rand()*Math.PI*2;
+      const p=center.clone().add(new THREE.Vector3(Math.cos(angle)*width*(.45+this.rand()*.65),baseY+.12+this.rand()*height*.4,Math.sin(angle)*depth*(.45+this.rand()*.7)));
+      this.leaf(p,.28+this.rand()*.25,i,new THREE.Vector3((this.rand()-.5)*.4,.3,1),angle,.7+this.rand()*.22);
+    }
+  }
+
+  hydrangeaBank(center, options = {}) {
+    const count=options.count ?? 12;
+    const width=options.width ?? 1.4;
+    const depth=options.depth ?? .55;
+    const colors=options.colors ?? [0xdce8ec,0x9fbac7,0xf3eee4];
+    for(let i=0;i<count;i++) {
+      const p=center.clone().add(new THREE.Vector3((this.rand()-.5)*width,.22+this.rand()*.32,(this.rand()-.5)*depth));
+      this.stem(center.clone().add(new THREE.Vector3((p.x-center.x)*.25,.03,(p.z-center.z)*.25)),p,.012);
+      this.hydrangea(p,.34+this.rand()*.16,colors,new THREE.Vector3((this.rand()-.5)*.2,.35,1));
+    }
+  }
+
+  arch(center, radius, recipe, options = {}) {
+    const start=options.start ?? .32;
+    const end=options.end ?? Math.PI-.32;
+    const count=options.count ?? 82;
+    const z=options.z ?? 0;
+    for(let i=0;i<count;i++) {
+      const t=i/Math.max(1,count-1);
+      const angle=THREE.MathUtils.lerp(start,end,t);
+      const radial=radius+(this.rand()-.5)*(options.depthJitter ?? .22);
+      const p=center.clone().add(new THREE.Vector3(Math.cos(angle)*radial,Math.sin(angle)*radial,z+(this.rand()-.5)*.22));
+      const item=recipe[Math.floor(this.rand()*recipe.length)];
+      const normal=new THREE.Vector3(Math.cos(angle)*.08,.05,1).normalize();
+      const size=(item.size ?? .24)*(.8+this.rand()*.4);
+      if(item.type==='rose') this.rose(p,size,item.color,normal);
+      else if(item.type==='peony') this.peony(p,size,item.color,normal);
+      else if(item.type==='ranunculus') this.ranunculus(p,size,item.color,normal);
+      else if(item.type==='dahlia') this.dahlia(p,size,item.colors ?? [item.color],normal);
+      else if(item.type==='orchid') this.orchid(p,size,item.color,item.lip ?? item.color,normal);
+      else if(item.type==='hydrangea') this.hydrangea(p,size,item.colors ?? [item.color],normal);
+      else this.daisy(p,size,item.color,item.center ?? 0xc8a15c,normal,item.petals ?? 8);
+      if(i%2===0) this.leaf(p.clone().add(new THREE.Vector3((this.rand()-.5)*.18,(this.rand()-.5)*.18,-.07)),.26+this.rand()*.21,i,normal,angle+this.rand(),.72);
+    }
+  }
+
+  flush(parent) {
+    this.instances.forEach(({ geometry, color, matrices, options }) => {
+      if (!matrices.length) return;
+      const mat=material(color,options.roughness ?? .84,options.metalness ?? 0,{
+        side:options.side ?? THREE.FrontSide,
+        emissive:options.emissive ?? 0,
+        emissiveIntensity:options.emissiveIntensity ?? 0
+      });
+      const mesh=new THREE.InstancedMesh(geometry,mat,matrices.length);
+      matrices.forEach((matrix,index)=>mesh.setMatrixAt(index,matrix));
+      mesh.instanceMatrix.needsUpdate=true;
+      mesh.castShadow=true;
+      mesh.receiveShadow=true;
+      mesh.frustumCulled=false;
+      parent.add(mesh);
