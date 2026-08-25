@@ -1,0 +1,10 @@
+{
+  "name": "biltmore-christmas-tree-work-game",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 4173",
+    "test": "node tests/static-check.mjs && node tests/runtime-state.mjs && node tests/input-flow.mjs"
+  }
+}
