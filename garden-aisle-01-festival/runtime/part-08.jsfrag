@@ -1,0 +1,85 @@
+    if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height);}
+  }
+
+  function scheduleFrame(){
+    if(framePending) return;
+    framePending = true;
+    requestAnimationFrame(render);
+  }
+
+  function render(now){
+    framePending = false;
+    if(!window.__AISLE_CAPTURE_MODE__ && now - lastFrameTime < 32){ scheduleFrame(); return; }
+    lastFrameTime = now;
+    resize();
+    const t=(now-state.startTime)/1000;
+    const v=currentVariant;
+    state.parallax[0]+=(state.parallaxTarget[0]-state.parallax[0])*.045;
+    state.parallax[1]+=(state.parallaxTarget[1]-state.parallax[1])*.045;
+    state.cheer=state.cheerStart===-Infinity?0:Math.min(4.6,(now-state.cheerStart)/1000);
+    const aspect=width/height;
+    const projection=m4(); perspective(projection,(state.viewWide?46:42)*Math.PI/180,aspect,.1,100);
+    const baseEye=state.viewWide?[9.2,3.75,6.6]:[0,4.9,17.0];
+    const eye=[baseEye[0]+state.parallax[0],baseEye[1]+state.parallax[1]+Math.sin(t*.22)*.018,baseEye[2]];
+    const target=state.viewWide?[3.0,1.75,-7.8]:[state.parallax[0]*.12,2.25+state.parallax[1]*.08,-7.4];
+    const view=m4();lookAt(view,eye,target,[0,1,0]);
+    gl.clearColor(...hexColor(v.sky),1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniformMatrix4fv(locations.uProjection,false,projection);gl.uniformMatrix4fv(locations.uView,false,view);
+    gl.uniform3fv(locations.uCamera,eye);gl.uniform3fv(locations.uFogColor,hexColor(v.fog));gl.uniform1f(locations.uFogDensity,v.fogDensity);
+    gl.uniform3fv(locations.uKeyDir,[-.58,-.9,.35]);gl.uniform3fv(locations.uKeyColor,v.light);
+    gl.uniform3fv(locations.uFillDir,[.65,-.35,-.25]);gl.uniform3fv(locations.uFillColor,[.42,.52,.58]);gl.uniform3fv(locations.uAmbient,[.35,.32,.28]);
+    gl.disable(gl.BLEND);gl.depthMask(true);drawList(opaque,t);
+    gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);drawList(transparent,t);gl.depthMask(true);
+    if(!window.__AISLE_CAPTURE_MODE__) scheduleFrame();
+  }
+
+  function updateUI(animate=true,direction=1){
+    const v=variants[state.index]; currentVariant=v;
+    app.style.setProperty('--accent',v.accent);app.style.setProperty('--accent-2',v.accent2);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',v.sky);
+    sceneNumber.textContent=v.number;sceneKicker.textContent=v.kicker;sceneTitle.textContent=v.title;sceneDescription.textContent=v.description;
+    featureList.innerHTML=v.features.map(feature=>`<span class="feature-chip">${feature}</span>`).join('');
+    Array.from(sceneRail.children).forEach((button,i)=>{
+      const selected=i===state.index;button.setAttribute('aria-selected',String(selected));
+      if(selected)button.scrollIntoView({block:'nearest',inline:'center',behavior:state.reduced?'auto':'smooth'});
+    });
+    buildScene(v);
+    const url=new URL(location.href);url.searchParams.set('v',String(state.index+1));history.replaceState(null,'',url);
+    if(animate&&!state.reduced){
+      canvas.animate([{opacity:.68,transform:`translateX(${direction*10}px)`},{opacity:1,transform:'translateX(0)'}],{duration:480,easing:'cubic-bezier(.2,.8,.2,1)'});
+    }
+    playTone(260+state.index*18,.035);
+    scheduleFrame();
+  }
+
+  function setupRail(){
+    variants.forEach((v,i)=>{
+      const button=document.createElement('button');button.type='button';button.className='scene-tab';button.role='tab';
+      button.setAttribute('aria-label',`${v.number} ${v.title}`);button.setAttribute('aria-selected',String(i===state.index));
+      button.innerHTML=`<span>${v.number}</span><b>${v.short}</b>`;
+      button.addEventListener('click',()=>{const d=i>=state.index?1:-1;state.index=i;updateUI(true,d);});
+      sceneRail.appendChild(button);
+    });
+  }
+
+  function next(delta){state.index=(state.index+delta+variants.length)%variants.length;updateUI(true,delta);}
+  function toggleView(){state.viewWide=!state.viewWide;viewButton.setAttribute('aria-pressed',String(state.viewWide));viewLabel.textContent=state.viewWide?'装飾のそば':'ゲストの目線';playTone(state.viewWide?392:330,.045);scheduleFrame();}
+  function ensureAudio(){if(!state.audio)state.audio=new (window.AudioContext||window.webkitAudioContext)();if(state.audio.state==='suspended')state.audio.resume();}
+  function playTone(freq=330,vol=.05){if(!state.soundOn)return;ensureAudio();const now=state.audio.currentTime;[1,1.25,1.5].forEach((ratio,i)=>{const osc=state.audio.createOscillator(),gain=state.audio.createGain();osc.type=i===1?'triangle':'sine';osc.frequency.setValueAtTime(freq*ratio,now+i*.055);gain.gain.setValueAtTime(.0001,now+i*.055);gain.gain.exponentialRampToValueAtTime(vol/(i+1),now+i*.055+.018);gain.gain.exponentialRampToValueAtTime(.0001,now+i*.055+.36);osc.connect(gain).connect(state.audio.destination);osc.start(now+i*.055);osc.stop(now+i*.055+.38);});}
+  function toggleSound(){state.soundOn=!state.soundOn;soundButton.setAttribute('aria-pressed',String(state.soundOn));if(state.soundOn){ensureAudio();playTone(330,.055);}}
+  function cheer(){state.cheerStart=performance.now()-(window.__AISLE_CAPTURE_MODE__?650:0);celebrateButton.classList.remove('cheering');void celebrateButton.offsetWidth;celebrateButton.classList.add('cheering');playTone(392,.08);scheduleFrame();setTimeout(()=>celebrateButton.classList.remove('cheering'),700);}
+  function openInfo(){infoPanel.classList.add('open');infoPanel.setAttribute('aria-hidden','false');infoPanel.querySelector('.sheet-close')?.focus();}
+  function closeInfo(){infoPanel.classList.remove('open');infoPanel.setAttribute('aria-hidden','true');infoButton.focus();}
+
+  function initEvents(){
+    previousButton.addEventListener('click',()=>next(-1));nextButton.addEventListener('click',()=>next(1));viewButton.addEventListener('click',toggleView);soundButton.addEventListener('click',toggleSound);celebrateButton.addEventListener('click',cheer);infoButton.addEventListener('click',openInfo);
+    infoPanel.querySelectorAll('[data-close-sheet]').forEach(el=>el.addEventListener('click',closeInfo));
+    window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')next(-1);if(e.key==='ArrowRight')next(1);if(e.key===' ')cheer();if(e.key==='Escape'&&infoPanel.classList.contains('open'))closeInfo();});
+    canvas.addEventListener('pointerdown',e=>{state.pointerDown=true;state.pointerStart=[e.clientX,e.clientY];state.drag=0;canvas.setPointerCapture?.(e.pointerId);});
+    canvas.addEventListener('pointermove',e=>{state.parallaxTarget=[(e.clientX/innerWidth*2-1)*.65,(.5-e.clientY/innerHeight)*.42];scheduleFrame();if(state.pointerDown)state.drag=Math.hypot(e.clientX-state.pointerStart[0],e.clientY-state.pointerStart[1]);});
+    canvas.addEventListener('pointerup',e=>{if(!state.pointerDown)return;state.pointerDown=false;const dx=e.clientX-state.pointerStart[0],dy=e.clientY-state.pointerStart[1];if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.12)next(dx<0?1:-1);else if(state.drag<8)cheer();});
+    canvas.addEventListener('pointercancel',()=>{state.pointerDown=false;});
+  }
+
+  function init(){
+    try{
