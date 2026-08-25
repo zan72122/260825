@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#15130f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>ほんもののクリスマスツリー — トップページ比較試作</title>
+  <meta name="description" content="4歳児向け3Dモバイルゲーム『ほんもののクリスマスツリー』の、14種類のトップページ比較試作。" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body data-ui="heritage">
+  <div id="app" aria-busy="true">
+    <canvas id="scene-canvas" aria-label="立体のクリスマスツリー会場"></canvas>
+
+    <div id="static-fallback" class="static-fallback" aria-hidden="true">
+      <div class="fallback-hall"></div>
+      <div class="fallback-tree"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="fallback-crate"></div>
+    </div>
+
+    <div class="lens-vignette" aria-hidden="true"></div>
+    <div class="paper-grain" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <div class="brand-lockup" aria-label="ゲーム名">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 44 44" role="img">
+            <path d="M22 4.5 12.5 20h5.8L9.5 33.5h25L25.7 20h5.8Z" />
+            <path d="M18.8 33.5h6.4v6h-6.4z" />
+          </svg>
+        </span>
+        <span class="brand-type">
+          <small>ほんものを、いっしょにつくる</small>
+          <strong>クリスマスツリー</strong>
+        </span>
+      </div>
+
+      <div class="utility-actions">
+        <button id="sound-button" class="round-control" type="button" aria-label="音を切り替える" aria-pressed="false">
+          <svg class="icon-sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Zm12.5-1.7a6.2 6.2 0 0 1 0 9.4m2.6-12a10 10 0 0 1 0 14.6"/></svg>
+          <svg class="icon-sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Zm12-1 5 5m0-5-5 5"/></svg>
+        </button>
+        <button id="info-button" class="round-control" type="button" aria-label="この試作について"><span aria-hidden="true">i</span></button>
+      </div>
+    </header>
+
+    <main class="hero-interface">
+      <section id="copy-panel" class="copy-panel" aria-live="polite">
+        <div class="scene-index-row">
+          <span id="scene-number" class="scene-number">01 / 14</span>
+          <span id="scene-place" class="scene-place">ASHEVILLE · USA</span>
+        </div>
+        <p id="scene-kicker" class="scene-kicker">35フィートの木を、みんなで立てる朝</p>
+        <h1 id="scene-title" class="scene-title">大広間に木がやってきた</h1>
+        <p id="scene-description" class="scene-description">重い生木、保護マット、木箱、長い装飾竿。完成だけでなく、仕事の途中から始まります。</p>
+
+        <button id="start-button" class="start-button" type="button">
+          <span class="start-button__handle" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M11 7.5v17L24 16 11 7.5Z"/></svg></span>
+          <span class="start-button__copy"><small id="start-overline">さいしょのしごと</small><strong id="start-label">木をむかえにいく</strong></span>
+          <span class="start-button__chevron" aria-hidden="true">›</span>
+        </button>
+
+        <div class="gesture-hint" aria-hidden="true"><span class="gesture-hand">☝︎</span><span>左右にすべらせて、14の世界を見る</span></div>
+      </section>
+
+      <aside class="material-caption" aria-hidden="true"><span class="material-caption__line"></span><span id="material-caption">FRASER FIR · OAK · IRON · LINEN</span></aside>
+
+      <nav class="variant-navigation" aria-label="トップページ案を選ぶ">
+        <button id="previous-button" class="nav-arrow nav-arrow--previous" type="button" aria-label="前の案"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+        <div id="variant-dots" class="variant-dots" role="tablist" aria-label="14案"></div>
+        <button id="next-button" class="nav-arrow nav-arrow--next" type="button" aria-label="次の案"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+      </nav>
+    </main>
+
+    <div id="loading-indicator" class="loading-indicator" role="status"><span class="loading-ring" aria-hidden="true"></span><span>会場を組み立てています</span></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <section id="info-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="info-title" hidden>
+      <div class="modal__scrim" data-close-modal></div>
+      <article class="modal__sheet">
+        <button class="modal__close" type="button" aria-label="閉じる" data-close-modal>×</button>
+        <p class="modal__eyebrow">TOP PAGE STUDY</p>
+        <h2 id="info-title">14の入口から、本編の世界を選ぶ</h2>
+        <p>これはトップページだけの比較試作です。背景画像ではなく、木・枝・幹・床・壁・照明・木箱・道具をWebGLの立体として組み立てています。</p>
+        <p>本編では、実際の大規模ツリー設営を参考に、計画、搬入、起立、固定、枝起こし、配線、装飾、点灯、手入れ、撤収までを4歳向けのタッチ操作に変換します。</p>
+        <div class="modal__facts"><span><b>14</b> 大幅に異なる会場</span><span><b>縦・横</b> 両画面対応</span><span><b>3D</b> 実ジオメトリ</span></div>
+      </article>
+    </section>
+
+    <section id="start-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="start-title" hidden>
+      <div class="modal__scrim" data-close-modal></div>
+      <article class="modal__sheet modal__sheet--start">
+        <button class="modal__close" type="button" aria-label="閉じる" data-close-modal>×</button>
+        <div class="chapter-seal" aria-hidden="true">1</div>
+        <p class="modal__eyebrow">NEXT SESSION</p>
+        <h2 id="start-title">第1章「どんな木にする？」へ</h2>
+        <p id="start-modal-copy">設計図と会場を見比べて、木の高さ・入口・天井・飾りの物語を決めます。本編は次回以降に実装します。</p>
+        <button class="modal__secondary" type="button" data-close-modal>トップページにもどる</button>
+      </article>
+    </section>
+  </div>
+
+  <noscript>この試作にはJavaScriptが必要です。</noscript>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
