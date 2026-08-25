@@ -1,0 +1,258 @@
+const canvas = document.querySelector('#scene');
+const app = document.querySelector('#app');
+const fallback = document.querySelector('#fallback');
+const weatherLayer = document.querySelector('#weather');
+const variantNumber = document.querySelector('#variantNumber');
+const variantEyebrow = document.querySelector('#variantEyebrow');
+const variantTitle = document.querySelector('#variantTitle');
+const variantDescription = document.querySelector('#variantDescription');
+const variantRail = document.querySelector('#variantRail');
+const previousButton = document.querySelector('#previousButton');
+const nextButton = document.querySelector('#nextButton');
+const startButton = document.querySelector('#startButton');
+const startPanel = document.querySelector('#startPanel');
+const returnButton = document.querySelector('#returnButton');
+const infoButton = document.querySelector('#infoButton');
+const infoPanel = document.querySelector('#infoPanel');
+const soundButton = document.querySelector('#soundButton');
+
+const variants = [
+  {
+    id: 'courtyard-dawn', number: '01', tab: '朝', eyebrow: 'ALDIE COURTYARD STUDY',
+    title: '朝の中庭', description: 'れんがの中庭で、まるいアーチに花をつけよう。',
+    layout: 'courtyard', style: 'editorial', uiTone: 'light', weather: 'clear',
+    accent: '#984f5d', accentSoft: '#ddb2ba', background: 0xc6b39b, fog: 0xcfc3b3,
+    sky: 0xc8d2cf, ground: 0x746d61, sun: 0xffd8ad, sunIntensity: 3.2,
+    sunPos: [-7, 10, 8], hemi: 1.55, exposure: 1.02,
+    camera: [10.8, 5.7, 14.3], target: [0, 2.65, -0.7], fov: 39,
+    flower: [0xf0dfd8, 0xe3a5ad, 0xf1eee4, 0x9eb1ba], leaf: [0x52674f, 0x82907a]
+  },
+  {
+    id: 'fountain-noon', number: '02', tab: '噴水', eyebrow: 'FLORAL FOUNTAIN / CLOSE STUDY',
+    title: '噴水の花', description: '石のまるみにそって、花と葉を流れるように置こう。',
+    layout: 'fountain', style: 'minimal', uiTone: 'light', weather: 'clear',
+    accent: '#496f72', accentSoft: '#b9d4cf', background: 0xb7c9c7, fog: 0xcbd6d2,
+    sky: 0xd6e2df, ground: 0x7a766c, sun: 0xfff0d2, sunIntensity: 3.8,
+    sunPos: [5, 12, 6], hemi: 1.8, exposure: 1.08,
+    camera: [7.7, 4.15, 9.8], target: [0, 1.65, -0.4], fov: 36,
+    flower: [0xf3eee5, 0xe3a8b1, 0xd8c4aa, 0xaac3ca], leaf: [0x3f644d, 0x84927b]
+  },
+  {
+    id: 'workshop', number: '03', tab: '工房', eyebrow: 'FLORIST WORKROOM / 06:40',
+    title: '花屋さんの朝', description: '水のバケツ、花ばさみ、作りかけのアーチ。仕事場から始めよう。',
+    layout: 'workshop', style: 'documentary', uiTone: 'dark', weather: 'clear',
+    accent: '#e1b474', accentSoft: '#c9935d', background: 0x31383a, fog: 0x4d5555,
+    sky: 0x9ca6a3, ground: 0x575a58, sun: 0xffd7a0, sunIntensity: 2.15,
+    sunPos: [-4, 8, 5], hemi: 0.92, exposure: 0.88,
+    camera: [9.7, 4.7, 12.8], target: [0.2, 2.0, -1.2], fov: 42,
+    flower: [0xe9ddd0, 0xc77b8a, 0xe5b8a2, 0x7f9ca4], leaf: [0x415849, 0x74806d]
+  },
+  {
+    id: 'rain-loadin', number: '04', tab: '搬入', eyebrow: 'RAIN LOAD-IN / SERVICE COURT',
+    title: '雨の日の搬入', description: '花をぬらさず、重い台とバケツを会場へ運ぼう。',
+    layout: 'loadin', style: 'cinematic', uiTone: 'dark', weather: 'rain',
+    accent: '#d0a57e', accentSoft: '#8eaeb4', background: 0x5e6b70, fog: 0x78868a,
+    sky: 0x87979a, ground: 0x3d4546, sun: 0xc8d3d4, sunIntensity: 1.7,
+    sunPos: [2, 10, 4], hemi: 1.05, exposure: 0.82,
+    camera: [10.2, 4.3, 13.5], target: [0.5, 1.7, -1.0], fov: 43,
+    flower: [0xe9e4d8, 0xcf8796, 0xd9b29c, 0x97aab7], leaf: [0x3a584b, 0x6b8273]
+  },
+  {
+    id: 'garden-aisle', number: '05', tab: '庭', eyebrow: 'GARDEN CEREMONY / GOLDEN HOUR',
+    title: '花の小道', description: 'いすの間を、低い花の島でやさしくつなごう。',
+    layout: 'garden', style: 'naturalist', uiTone: 'light', weather: 'clear',
+    accent: '#8f5a48', accentSoft: '#d9b8a0', background: 0xaab795, fog: 0xc5cbb4,
+    sky: 0xdad3b8, ground: 0x516244, sun: 0xffc77e, sunIntensity: 3.5,
+    sunPos: [-9, 6, 7], hemi: 1.45, exposure: 1.0,
+    camera: [0.3, 3.7, 15.8], target: [0, 1.65, -3.4], fov: 38,
+    flower: [0xf1e6d7, 0xd99b9d, 0xe4c88e, 0x9daeb5], leaf: [0x3f5f3c, 0x718260]
+  },
+  {
+    id: 'glasshouse', number: '06', tab: '温室', eyebrow: 'GLASSHOUSE / DIFFUSED DAYLIGHT',
+    title: '空中の花雲', description: '安全ワイヤーの枠に、軽い花を少しずつ足そう。',
+    layout: 'glasshouse', style: 'architectural', uiTone: 'light', weather: 'clear',
+    accent: '#4e756c', accentSoft: '#bdd5cc', background: 0xc7d6d2, fog: 0xdce4df,
+    sky: 0xe4efec, ground: 0xa7a397, sun: 0xffffff, sunIntensity: 2.5,
+    sunPos: [4, 12, 2], hemi: 2.0, exposure: 1.08,
+    camera: [10.5, 5.5, 14.7], target: [0, 2.85, -1.4], fov: 40,
+    flower: [0xf0e9de, 0xe1bac0, 0xc6d4cc, 0xaabfc9], leaf: [0x476c58, 0x809781]
+  },
+  {
+    id: 'long-table', number: '07', tab: '食卓', eyebrow: 'ATRIUM RECEPTION / BLUE HOUR',
+    title: '長いテーブル', description: '目線をさえぎらない低い花を、食卓の中央へつなげよう。',
+    layout: 'reception', style: 'hospitality', uiTone: 'dark', weather: 'clear',
+    accent: '#d7aa79', accentSoft: '#b98562', background: 0x35404a, fog: 0x5c6265,
+    sky: 0x71808b, ground: 0x574c43, sun: 0xffbd78, sunIntensity: 2.2,
+    sunPos: [-6, 7, 3], hemi: 0.75, exposure: 0.91,
+    camera: [10.9, 4.6, 14.5], target: [0, 1.75, -2.1], fov: 39,
+    flower: [0xeadfd4, 0xd4919e, 0xdcc6ab, 0x93a9ba], leaf: [0x405849, 0x718171]
+  },
+  {
+    id: 'sweetheart', number: '08', tab: '高砂', eyebrow: 'SWEETHEART TABLE / CANDLE STUDY',
+    title: 'ふたりの花', description: 'テーブルの端から、花を滝のように下へ流そう。',
+    layout: 'sweetheart', style: 'intimate', uiTone: 'dark', weather: 'clear',
+    accent: '#c99571', accentSoft: '#e0b49a', background: 0x352c2a, fog: 0x4d403b,
+    sky: 0x62534d, ground: 0x4a3931, sun: 0xffa86b, sunIntensity: 1.75,
+    sunPos: [3, 6, 4], hemi: 0.55, exposure: 0.82,
+    camera: [7.2, 3.2, 9.0], target: [0, 1.75, -1.6], fov: 34,
+    flower: [0xf0dfd5, 0xcb7f8c, 0xd9ad91, 0x8fa8b2], leaf: [0x354b40, 0x667767]
+  },
+  {
+    id: 'moon-courtyard', number: '09', tab: '夜', eyebrow: 'COURTYARD AFTER DARK / 20:10',
+    title: '月夜の完成', description: '昼に作った花が、月明かりとろうそくで静かに見える。',
+    layout: 'moon', style: 'nocturne', uiTone: 'dark', weather: 'clear',
+    accent: '#d8b47c', accentSoft: '#879bb5', background: 0x182330, fog: 0x293746,
+    sky: 0x41516a, ground: 0x303135, sun: 0xb7c7e8, sunIntensity: 1.65,
+    sunPos: [-6, 11, -2], hemi: 0.48, exposure: 0.72,
+    camera: [10.9, 5.1, 14.7], target: [0, 2.45, -1.0], fov: 39,
+    flower: [0xe5e0d8, 0xb77b8d, 0xbda88f, 0x7e95aa], leaf: [0x31483d, 0x586a5e]
+  },
+  {
+    id: 'winter-ballroom', number: '10', tab: '冬', eyebrow: 'WINTER BALLROOM / COOL DAYLIGHT',
+    title: '冬の白い花', description: '白い花の形を、葉と影で見つけやすくしよう。',
+    layout: 'winter', style: 'quiet-luxury', uiTone: 'light', weather: 'clear',
+    accent: '#647a84', accentSoft: '#cbd5d5', background: 0xd0d7d8, fog: 0xe0e4e3,
+    sky: 0xe7eeee, ground: 0x918f88, sun: 0xeef7ff, sunIntensity: 2.8,
+    sunPos: [-4, 9, 6], hemi: 1.8, exposure: 1.05,
+    camera: [10.8, 4.8, 14.7], target: [0, 1.85, -2.0], fov: 40,
+    flower: [0xf3f0e8, 0xe1ded7, 0xd8dde0, 0xb8c7cd], leaf: [0x506158, 0x8a9690]
+  },
+  {
+    id: 'okinawa-terrace', number: '11', tab: '南国', eyebrow: 'OKINAWA TERRACE / HUMID SUN',
+    title: '南の島の祝宴', description: '大きな葉を骨組みにして、風に強い花を重ねよう。',
+    layout: 'tropical', style: 'tropical-realism', uiTone: 'light', weather: 'clear',
+    accent: '#a44350', accentSoft: '#e19a9c', background: 0x78a7a6, fog: 0xb2cbc2,
+    sky: 0x91c6cd, ground: 0x9b8a6c, sun: 0xffe6b4, sunIntensity: 4.2,
+    sunPos: [-3, 12, 4], hemi: 1.75, exposure: 1.03,
+    camera: [10.5, 5.0, 14.2], target: [0, 2.3, -1.4], fov: 39,
+    flower: [0xf5e8d8, 0xd44f65, 0xf0a26f, 0xcf7394], leaf: [0x235d46, 0x5d8a62]
+  },
+  {
+    id: 'old-master', number: '12', tab: '絵画', eyebrow: 'OLD-MASTER LIGHT / MATERIAL STUDY',
+    title: '光の中の花', description: '暗い会場で、花びらの厚みと器の重さを光で見よう。',
+    layout: 'oldmaster', style: 'painterly', uiTone: 'dark', weather: 'clear',
+    accent: '#d5a45c', accentSoft: '#9d6847', background: 0x251c18, fog: 0x31251f,
+    sky: 0x4b3d32, ground: 0x3a2b23, sun: 0xffb85f, sunIntensity: 3.6,
+    sunPos: [-5, 8, 6], hemi: 0.24, exposure: 0.69,
+    camera: [7.7, 4.0, 10.5], target: [0, 2.05, -1.6], fov: 35,
+    flower: [0xe9d5c5, 0xb96b72, 0xd8a366, 0x708894], leaf: [0x293e31, 0x566552]
+  },
+  {
+    id: 'mechanics', number: '13', tab: '構造', eyebrow: 'HOW IT STANDS / MECHANICS REVEALED',
+    title: '花のうらがわ', description: '重り、金属の輪、網、結束。倒れない理由を見てみよう。',
+    layout: 'mechanics', style: 'technical', uiTone: 'light', weather: 'clear',
+    accent: '#3d6972', accentSoft: '#abc7c7', background: 0xb8c0bd, fog: 0xd2d6d2,
+    sky: 0xdde1de, ground: 0x888b87, sun: 0xffffff, sunIntensity: 3.1,
+    sunPos: [-7, 10, 7], hemi: 1.75, exposure: 1.06,
+    camera: [8.9, 4.4, 11.7], target: [0, 2.15, -1.0], fov: 37,
+    flower: [0xefe4d9, 0xd49aa4, 0xd6b69b, 0x9fb8c3], leaf: [0x41634e, 0x76907b]
+  },
+  {
+    id: 'diorama', number: '14', tab: '模型', eyebrow: 'WHOLE VENUE / TABLETOP DIORAMA',
+    title: '会場をひと目で', description: '準備する場所、式の場所、食事の場所を小さな模型で見渡そう。',
+    layout: 'diorama', style: 'diorama', uiTone: 'light', weather: 'clear',
+    accent: '#7f5a45', accentSoft: '#c9a98f', background: 0xb9b2a8, fog: 0xd1cbc1,
+    sky: 0xd9d3ca, ground: 0x776c60, sun: 0xffdfb7, sunIntensity: 3.0,
+    sunPos: [-8, 11, 9], hemi: 1.35, exposure: 1.0,
+    camera: [9.8, 8.6, 13.2], target: [0, 1.35, -0.8], fov: 36,
+    flower: [0xe8ddd2, 0xc98d97, 0xd5ae8f, 0x91a8b0], leaf: [0x455f4c, 0x758572]
+  }
+];
+
+const state = {
+  index: 0,
+  pointerDown: false,
+  pointerStart: new THREE.Vector2(),
+  pointerLast: new THREE.Vector2(),
+  dragDistance: 0,
+  cameraNudge: new THREE.Vector2(),
+  cameraNudgeTarget: new THREE.Vector2(),
+  cameraFrom: new THREE.Vector3(),
+  cameraTo: new THREE.Vector3(),
+  targetFrom: new THREE.Vector3(),
+  targetTo: new THREE.Vector3(),
+  transitionStart: performance.now(),
+  transitionDuration: 850,
+  reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  soundOn: false,
+  audioContext: null,
+  sway: [],
+  candleLights: [],
+  waterDrops: [],
+  dust: null,
+  clock: new THREE.Clock()
+};
+
+let renderer;
+let scene;
+let camera;
+let world;
+let lightRoot;
+let currentTextures = [];
+
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
+const dummy = new THREE.Object3D();
+
+function seeded(seed) {
+  let value = seed >>> 0;
+  return () => {
+    value += 0x6D2B79F5;
+    let t = value;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function srgb(color) {
+  return new THREE.Color(color);
+}
+
+function canvasTexture(size, painter, repeatX = 1, repeatY = 1) {
+  const textureCanvas = document.createElement('canvas');
+  textureCanvas.width = size;
+  textureCanvas.height = size;
+  const ctx = textureCanvas.getContext('2d');
+  painter(ctx, size);
+  const texture = new THREE.CanvasTexture(textureCanvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(repeatX, repeatY);
+  texture.anisotropy = Math.min(8, renderer?.capabilities.getMaxAnisotropy?.() || 4);
+  currentTextures.push(texture);
+  return texture;
+}
+
+function makeBrickTexture(seed = 1, repeatX = 5, repeatY = 3) {
+  const rand = seeded(seed);
+  return canvasTexture(512, (ctx, size) => {
+    ctx.fillStyle = '#7b4a38';
+    ctx.fillRect(0, 0, size, size);
+    const rows = 16;
+    const h = size / rows;
+    const w = h * 2.05;
+    ctx.lineWidth = 2.2;
+    for (let row = 0; row < rows; row++) {
+      const offset = row % 2 ? -w / 2 : 0;
+      for (let x = offset; x < size; x += w) {
+        const warm = Math.floor(54 + rand() * 38);
+        ctx.fillStyle = `rgb(${112 + warm / 3},${53 + warm / 6},${39 + warm / 9})`;
+        ctx.fillRect(x + 2, row * h + 2, w - 4, h - 4);
+        ctx.fillStyle = `rgba(55,31,24,${0.06 + rand() * 0.08})`;
+        ctx.fillRect(x + 5, row * h + 5, w - 10, Math.max(2, h * .12));
+      }
+    }
+    ctx.strokeStyle = '#9f8a77';
+    ctx.globalAlpha = .8;
+    for (let row = 0; row <= rows; row++) {
+      ctx.beginPath(); ctx.moveTo(0, row * h); ctx.lineTo(size, row * h); ctx.stroke();
+    }
+    for (let row = 0; row < rows; row++) {
+      const offset = row % 2 ? -w / 2 : 0;
+      for (let x = offset; x < size; x += w) {
+        ctx.beginPath(); ctx.moveTo(x, row * h); ctx.lineTo(x, (row + 1) * h); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < 1200; i++) {
