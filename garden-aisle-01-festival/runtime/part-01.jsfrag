@@ -1,0 +1,87 @@
+(() => {
+  'use strict';
+
+  const canvas = document.querySelector('#scene');
+  const app = document.querySelector('#app');
+  const loading = document.querySelector('#loading');
+  const fallback = document.querySelector('#fallback');
+  const sceneNumber = document.querySelector('#sceneNumber');
+  const sceneKicker = document.querySelector('#sceneKicker');
+  const sceneTitle = document.querySelector('#sceneTitle');
+  const sceneDescription = document.querySelector('#sceneDescription');
+  const featureList = document.querySelector('#featureList');
+  const sceneRail = document.querySelector('#sceneRail');
+  const previousButton = document.querySelector('#previousButton');
+  const nextButton = document.querySelector('#nextButton');
+  const viewButton = document.querySelector('#viewButton');
+  const viewLabel = document.querySelector('#viewLabel');
+  const soundButton = document.querySelector('#soundButton');
+  const celebrateButton = document.querySelector('#celebrateButton');
+  const infoButton = document.querySelector('#infoButton');
+  const infoPanel = document.querySelector('#infoPanel');
+
+  const variants = [
+    {
+      number: 'A1', short: '楽団', kicker: 'ROSE-GOLD ORCHESTRA', title: 'ローズゴールド祝宴オーケストラ',
+      description: '椅子、建物、木々、地面、参列者、演奏者まで、暖かな宝石色で一つの祝宴にします。',
+      features: ['金属椅子＋色クッション', '煉瓦館と祝旗', '木立の硝子ランタン', '弦楽四重奏＋ハープ', 'モザイクの小道', '宝石色の参列者'],
+      sky: '#e6ad79', fog: '#cfa27b', grass: '#5f7b43', path: '#c9936c', path2: '#e6bd79',
+      building: '#9c4f3e', roof: '#684338', chair: '#b77b55', cushion: '#c8505e', ribbon: '#e6a94e',
+      flowers: ['#d64f68','#f07c68','#d88fb3','#eab44f','#7772ad'], leaves: ['#315c3d','#5d7d49'],
+      guests: ['#b43756','#de713e','#4f739f','#7f4d91','#d59b2d'], accent: '#b75f52', accent2: '#d89c55',
+      decor: 'orchestra', light: [1.0, 0.69, 0.46], fogDensity: .019
+    },
+    {
+      number: 'A2', short: 'リボン', kicker: 'CORAL RIBBON PARADE', title: 'コーラル・リボン・パレード',
+      description: '珊瑚色のリボン、色違いのパラソル、金管楽器、縞模様の小道が、入場そのものを楽しい行進にします。',
+      features: ['珊瑚色の椅子帯', 'カラーパラソル', '小さな金管隊', '縞模様の舗装', '風に動く長いリボン', '扇を持つ参列者'],
+      sky: '#f1b48f', fog: '#d9a58e', grass: '#6f8c4d', path: '#d4695a', path2: '#f2b44f',
+      building: '#ce705c', roof: '#8e4b3f', chair: '#8a5b3f', cushion: '#ee7d65', ribbon: '#efb23b',
+      flowers: ['#ef5b68','#f58b58','#df557f','#e6ad36','#735bb0'], leaves: ['#3c6944','#73904e'],
+      guests: ['#ee5f5a','#f39a43','#3d7ca6','#a84d83','#6d9c4d'], accent: '#d45d50', accent2: '#efac3b',
+      decor: 'ribbon', light: [1.0, .74, .54], fogDensity: .020
+    },
+    {
+      number: 'A3', short: '劇場', kicker: 'JEWEL GARDEN THEATRE', title: '宝石色のガーデン劇場',
+      description: '深い色の椅子、劇場幕のような布、色硝子の灯り、歌い手とチェロが庭を祝祭の舞台に変えます。',
+      features: ['ベルベット調の椅子', '葡萄色の天蓋幕', '色硝子の灯り', '歌い手＋チェロ', '幾何学ラグの通路', '観客席のような段差'],
+      sky: '#c78683', fog: '#9c777a', grass: '#385a43', path: '#6e4561', path2: '#c89b49',
+      building: '#59435d', roof: '#392e45', chair: '#6e3b59', cushion: '#c34f69', ribbon: '#d7a342',
+      flowers: ['#c83d66','#e36a4f','#7c5eb5','#d9a43a','#3c7e8f'], leaves: ['#294b3b','#476b4b'],
+      guests: ['#7e3d75','#c24b59','#315f8c','#b27b2e','#4e7b52'], accent: '#8a456d', accent2: '#d4a144',
+      decor: 'theatre', light: [.94,.55,.50], fogDensity: .024
+    },
+    {
+      number: 'A4', short: '雨上り', kicker: 'JEWEL AFTER THE RAIN', title: '雨上がりのきらめき祝宴',
+      description: '濡れた石畳、琥珀色の傘、深い青緑の天幕、雨除けステージが、現場の実在感を残したまま華やぎます。',
+      features: ['濡れた石畳', '琥珀・赤・青の傘', '青緑の雨除け天幕', '屋根付きジャズ三重奏', '水滴の残る木々', '色反射する水たまり'],
+      sky: '#8fb1ad', fog: '#718e91', grass: '#3f6a53', path: '#405e63', path2: '#d08b52',
+      building: '#8b6552', roof: '#35565c', chair: '#365d60', cushion: '#d97955', ribbon: '#e0a842',
+      flowers: ['#d54c66','#ea7a4e','#6d61aa','#e0a43b','#4e8e8f'], leaves: ['#285845','#567b5f'],
+      guests: ['#d85f4f','#d9a43b','#3c6f91','#7c4e89','#4f8b63'], accent: '#c96a4f', accent2: '#d6a13a',
+      decor: 'rain', light: [.83,.86,.82], fogDensity: .022
+    },
+    {
+      number: 'A5', short: '回転木馬', kicker: 'CAROUSEL GARDEN', title: '木漏れ日のメリーゴーラウンド庭園',
+      description: '縞屋根、彩色木馬、風車、木琴の軽い音が、庭園を子どもにも一目で楽しい祝宴へ変えます。',
+      features: ['縞屋根の小さな舞台', '彩色した木馬', '紙風車の椅子飾り', '木琴＋クラリネット', '色タイルの小道', '木漏れ日の旗列'],
+      sky: '#f0c884', fog: '#d9b97d', grass: '#6d9046', path: '#d6a26b', path2: '#4f85a0',
+      building: '#d16d55', roof: '#4e829a', chair: '#c57543', cushion: '#e25f61', ribbon: '#4b8d9e',
+      flowers: ['#e35466','#ed7b46','#4b8fa2','#d7a83b','#8b58a8'], leaves: ['#3c6f42','#6d904b'],
+      guests: ['#e85f54','#e7a13d','#4f88a1','#8e54a4','#6c9b4e'], accent: '#d2604f', accent2: '#4f8799',
+      decor: 'carousel', light: [1.0,.79,.51], fogDensity: .018
+    },
+    {
+      number: 'A6', short: '地中海', kicker: 'MEDITERRANEAN MOSAIC FIESTA', title: '地中海モザイク・フィエスタ',
+      description: '青と黄のモザイク、テラコッタ壁、柑橘の木、ギターとカホンが、陽気な中庭をつくります。',
+      features: ['青黄モザイク舗装', 'テラコッタの建物', '実のなる柑橘樹', 'ギター三重奏＋カホン', '青い椅子と黄クッション', '陶器と果実の飾り'],
+      sky: '#83b7c9', fog: '#93b7bb', grass: '#6b8e45', path: '#3e82a0', path2: '#e1aa35',
+      building: '#c96d47', roof: '#87402e', chair: '#2f6f8e', cushion: '#e0a63a', ribbon: '#d9584b',
+      flowers: ['#dc4d5f','#ef7b47','#e0aa35','#6d58a6','#2d8294'], leaves: ['#366943','#719147'],
+      guests: ['#d94f4b','#e0a338','#327a9b','#8a4b94','#578e4a'], accent: '#317994', accent2: '#dea63b',
+      decor: 'mediterranean', light: [1.0,.85,.61], fogDensity: .017
+    },
+    {
+      number: 'A7', short: '沖縄', kicker: 'OKINAWA LANTERN CELEBRATION', title: '沖縄ランタンと三線の祝宴',
+      description: '赤瓦、紅型調の布、色提灯、三線と太鼓、ガジュマルの木陰が、南の島らしい祝祭をつくります。',
+      features: ['赤瓦の祝宴門', '紅型調の椅子布', '色提灯の木立', '三線＋太鼓の演奏', '琉球柄の小道', '扇と花笠の参列者'],
