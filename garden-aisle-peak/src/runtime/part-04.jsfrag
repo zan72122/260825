@@ -1,0 +1,153 @@
+    this.queue('heart-leaf', HEART_GEOMETRY, this.leafColors[colorIndex % this.leafColors.length], position, q, new THREE.Vector3(size * .78, size, size), { roughness: .88, side: THREE.DoubleSide });
+  }
+
+  petal(position, size, color, normal, angle = 0, shape = 'soft', tilt = 0) {
+    const q = qFromNormal(normal);
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(Z_AXIS, angle));
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), tilt));
+    const geometry = shape === 'fine' ? PETAL_FINE : PETAL;
+    this.queue(`petal-${shape}`, geometry, color, position, q, new THREE.Vector3(size.x, size.y, size.z), { roughness: .86, side: THREE.DoubleSide });
+  }
+
+  center(position, size, color = 0xc8a052, normal = new THREE.Vector3(0,0,1)) {
+    this.queue('center', CENTER, color, position, qFromNormal(normal), new THREE.Vector3(size,size,size), { roughness: .78 });
+  }
+
+  rose(position, size, color, normal = new THREE.Vector3(0,.15,1)) {
+    const n = normal.clone().normalize();
+    const baseQ = qFromNormal(n);
+    const rings = [
+      { count: 9, radius: .31, length: .65, width: .37, depth: .11, tilt: -.08 },
+      { count: 7, radius: .18, length: .48, width: .3, depth: .1, tilt: .1 },
+      { count: 5, radius: .08, length: .32, width: .24, depth: .09, tilt: .26 }
+    ];
+    rings.forEach((ring, r) => {
+      for (let i=0;i<ring.count;i++) {
+        const angle = (i / ring.count) * Math.PI * 2 + r * .32;
+        const local = new THREE.Vector3(Math.cos(angle)*size*ring.radius, Math.sin(angle)*size*ring.radius, r*size*.035).applyQuaternion(baseQ).add(position);
+        this.petal(local, new THREE.Vector3(size*ring.length,size*ring.width,size*ring.depth), color, n, angle - Math.PI/2, 'soft', ring.tilt + (this.rand()-.5)*.18);
+      }
+    });
+    this.center(position.clone().add(n.clone().multiplyScalar(size*.045)),size*.12,0xb58a45,n);
+  }
+
+  peony(position, size, color, normal = new THREE.Vector3(0,.15,1)) {
+    const n = normal.clone().normalize();
+    const baseQ = qFromNormal(n);
+    const rings = [13,11,8];
+    rings.forEach((count,r) => {
+      for(let i=0;i<count;i++) {
+        const angle=(i/count)*Math.PI*2+r*.22;
+        const radius=size*(.34-r*.09)*(1+(this.rand()-.5)*.18);
+        const local=new THREE.Vector3(Math.cos(angle)*radius,Math.sin(angle)*radius,(this.rand()-.5)*size*.1+r*size*.04).applyQuaternion(baseQ).add(position);
+        this.petal(local,new THREE.Vector3(size*(.58-r*.07),size*(.36-r*.04),size*.1),color,n,angle-Math.PI/2,'fine',-.12+r*.18+(this.rand()-.5)*.28);
+      }
+    });
+    this.center(position.clone().add(n.clone().multiplyScalar(size*.07)),size*.1,0xd0aa65,n);
+  }
+
+  ranunculus(position, size, color, normal = new THREE.Vector3(0,.1,1)) {
+    const n=normal.clone().normalize();
+    const baseQ=qFromNormal(n);
+    for(let ring=0;ring<4;ring++) {
+      const count=10-ring;
+      const radius=size*(.31-ring*.07);
+      for(let i=0;i<count;i++) {
+        const angle=(i/count)*Math.PI*2+ring*.37;
+        const local=new THREE.Vector3(Math.cos(angle)*radius,Math.sin(angle)*radius,ring*size*.035).applyQuaternion(baseQ).add(position);
+        this.petal(local,new THREE.Vector3(size*(.48-ring*.055),size*(.28-ring*.035),size*.075),color,n,angle-Math.PI/2,'fine',ring*.1);
+      }
+    }
+    this.center(position.clone().add(n.clone().multiplyScalar(size*.08)),size*.07,0x9b7b3d,n);
+  }
+
+  daisy(position, size, color, centerColor = 0xc69b3f, normal = new THREE.Vector3(0,.1,1), petals = 9) {
+    const n=normal.clone().normalize();
+    const q=qFromNormal(n);
+    for(let i=0;i<petals;i++) {
+      const angle=(i/petals)*Math.PI*2;
+      const local=new THREE.Vector3(Math.cos(angle)*size*.42,Math.sin(angle)*size*.42,0).applyQuaternion(q).add(position);
+      this.petal(local,new THREE.Vector3(size*.72,size*.22,size*.075),color,n,angle-Math.PI/2,'fine',-.16);
+    }
+    this.center(position.clone().add(n.clone().multiplyScalar(size*.045)),size*.19,centerColor,n);
+  }
+
+  anemone(position, size, color, normal = new THREE.Vector3(0,.1,1)) {
+    this.daisy(position,size,color,0x232326,normal,7);
+    this.center(position.clone().add(normal.clone().normalize().multiplyScalar(size*.07)),size*.16,0x2d2b2c,normal);
+  }
+
+  hydrangea(position, size, colors, normal = new THREE.Vector3(0,.2,1)) {
+    const n=normal.clone().normalize();
+    const rand=this.rand;
+    const florets=Math.max(12,Math.floor(24*size/.6));
+    for(let i=0;i<florets;i++) {
+      const theta=rand()*Math.PI*2;
+      const phi=Math.acos(1-rand()*.95);
+      const localN=new THREE.Vector3(Math.sin(phi)*Math.cos(theta),Math.cos(phi),Math.sin(phi)*Math.sin(theta)).normalize();
+      const p=position.clone().add(localN.clone().multiplyScalar(size*(.52+rand()*.08)));
+      const color=colors[Math.floor(rand()*colors.length)];
+      this.daisy(p,size*.18,color,0xd6c9a7,localN.add(n.clone().multiplyScalar(.25)).normalize(),4);
+    }
+    for(let i=0;i<6;i++) this.leaf(position.clone().add(new THREE.Vector3((rand()-.5)*size,(-.2+rand()*.4)*size,(rand()-.5)*size)),size*.36,i,n,rand()*6,.85);
+  }
+
+  tulip(position, size, color, normal = new THREE.Vector3(0,.65,1)) {
+    const n=normal.clone().normalize();
+    const q=qFromNormal(n);
+    for(let i=0;i<6;i++) {
+      const angle=(i/6)*Math.PI*2;
+      const local=new THREE.Vector3(Math.cos(angle)*size*.18,Math.sin(angle)*size*.18,0).applyQuaternion(q).add(position);
+      const pq=q.clone().multiply(new THREE.Quaternion().setFromAxisAngle(Z_AXIS,angle-Math.PI/2));
+      pq.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0),.58));
+      this.queue('tulip-petal',TULIP_PETAL,color,local,pq,new THREE.Vector3(size*.42,size*.62,size*.16),{roughness:.84,side:THREE.DoubleSide});
+    }
+  }
+
+  dahlia(position, size, colors, normal = new THREE.Vector3(0,.1,1)) {
+    const n=normal.clone().normalize();
+    const baseQ=qFromNormal(n);
+    const rings=[18,15,11,7];
+    rings.forEach((count,r)=>{
+      for(let i=0;i<count;i++) {
+        const angle=(i/count)*Math.PI*2+r*.29;
+        const radius=size*(.39-r*.085);
+        const local=new THREE.Vector3(Math.cos(angle)*radius,Math.sin(angle)*radius,r*size*.032).applyQuaternion(baseQ).add(position);
+        this.petal(local,new THREE.Vector3(size*(.52-r*.055),size*(.17-r*.014),size*.055),colors[(i+r)%colors.length],n,angle-Math.PI/2,'fine',.08+r*.12);
+      }
+    });
+    this.center(position.clone().add(n.clone().multiplyScalar(size*.08)),size*.08,0x9a6b32,n);
+  }
+
+  orchid(position, size, color, lipColor, normal = new THREE.Vector3(0,.15,1)) {
+    const n=normal.clone().normalize();
+    const q=qFromNormal(n);
+    const petals=[
+      [0, .27, .55, .3, -.16],
+      [Math.PI*.42,.25,.55,.28,-.05],
+      [-Math.PI*.42,.25,.55,.28,-.05],
+      [Math.PI*.82,.21,.42,.25,.12],
+      [-Math.PI*.82,.21,.42,.25,.12]
+    ];
+    petals.forEach(([angle,rad,length,width,tilt])=>{
+      const p=new THREE.Vector3(Math.cos(angle)*size*rad,Math.sin(angle)*size*rad,0).applyQuaternion(q).add(position);
+      this.petal(p,new THREE.Vector3(size*length,size*width,size*.07),color,n,angle-Math.PI/2,'fine',tilt);
+    });
+    this.petal(position.clone().add(n.clone().multiplyScalar(size*.05)),new THREE.Vector3(size*.34,size*.23,size*.09),lipColor,n,0,'soft',.38);
+    this.center(position.clone().add(n.clone().multiplyScalar(size*.08)),size*.07,0xd4b06e,n);
+  }
+
+  anthurium(position, size, color, spadixColor = 0xe6bd65, normal = new THREE.Vector3(0,.2,1)) {
+    const n=normal.clone().normalize();
+    const q=qFromNormal(n);
+    this.queue('anthurium-spathe',HEART_GEOMETRY,color,position,q,new THREE.Vector3(size*.75,size,size),{roughness:.68,side:THREE.DoubleSide});
+    const tip=position.clone().add(n.clone().multiplyScalar(size*.1)).add(new THREE.Vector3(0,size*.08,0));
+    const end=tip.clone().add(new THREE.Vector3(0,size*.52,0).applyQuaternion(q));
+    this.stem(tip,end,size*.035,spadixColor);
+  }
+
+  calla(position, size, color, spadixColor = 0xd3a84e, normal = new THREE.Vector3(0,.3,1)) {
+    const n=normal.clone().normalize();
+    const q=qFromNormal(n);
+    this.queue('calla',TULIP_PETAL,color,position,q,new THREE.Vector3(size*.7,size*1.15,size*.28),{roughness:.82,side:THREE.DoubleSide});
+    const end=position.clone().add(n.clone().multiplyScalar(size*.22)).add(new THREE.Vector3(0,size*.45,0));
