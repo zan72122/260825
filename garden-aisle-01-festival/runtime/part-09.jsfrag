@@ -1,0 +1,13 @@
+      gl=canvas.getContext('webgl',{antialias:true,alpha:false,premultipliedAlpha:false,powerPreference:'high-performance'})||canvas.getContext('experimental-webgl');
+      if(!gl)throw new Error('WebGL is not available');
+      program=createProgram();gl.useProgram(program);
+      ['aPosition','aNormal'].forEach(name=>locations[name]=gl.getAttribLocation(program,name));
+      ['uProjection','uView','uModel','uNormalMatrix','uColor','uCamera','uKeyDir','uKeyColor','uFillDir','uFillColor','uAmbient','uFogColor','uFogDensity','uRoughness','uEmissive','uAlpha'].forEach(name=>locations[name]=gl.getUniformLocation(program,name));
+      gl.enableVertexAttribArray(locations.aPosition);gl.enableVertexAttribArray(locations.aNormal);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
+      createMeshes();setupRail();initEvents();updateUI(false,1);resize();
+      loading.classList.add('hidden');window.__AISLE_FESTIVAL_READY__=true;scheduleFrame();
+    }catch(error){console.error(error);loading.hidden=true;fallback.hidden=false;}
+  }
+
+  init();
+})();
