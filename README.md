@@ -76,7 +76,10 @@ Three.js本体は jsDelivr CDN から読み込みます。初回表示にはネ�
 ├── index.html
 ├── styles.css
 ├── src/
-│   └── main.js
+│   ├── main.js
+│   └── runtime/
+│       ├── part-01.jsfrag … part-06.jsfrag
+│       └── README.md
 └── docs/
     ├── RESEARCH_JA.md
     ├── GAME_PLAN_JA.md
