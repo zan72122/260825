@@ -1,0 +1,150 @@
+  const focal=ironArch(parent,[0,2.3,-9.55],2.28,{color:0x675044});
+  batch.arch(focal.center,focal.radius,[{type:'rose',color:0xf3d9dc,size:.24},{type:'ranunculus',color:0xf5eddf,size:.21},{type:'daisy',color:0xe7b56a,size:.16,petals:7}],{count:72,start:.12,end:Math.PI-.08});
+  addGroundPetals(parent,{seed:709,count:145,colors:[0xf3d9dc,0xf5eddf],length:20,width:2.5,z:-2});
+  batch.flush(parent);
+  addToolZone(parent,'orchard');
+}
+
+function buildAutumnHarvest(parent,config,registry,animationState) {
+  const rand=seeded(8080);
+  buildBase(parent,config,registry,animationState);
+  const batch=new FloralBatch({seed:808,leafColors:[0x596044,0x7c744d,0x746449]});
+  const dahliaColors=[0xaa4e45,0xd18449,0x7d3540,0xc76c4d];
+  for(let row=0;row<5;row++) {
+    const z=4.8-row*2.5;
+    for(let side of [-1,1]) {
+      const x=side*2.0;
+      buildCopperBowl(parent,[x,0,z],{color:row%2?0x9c5c37:0xb06d3d});
+      const base=new THREE.Vector3(x,.35,z);
+      for(let i=0;i<14;i++) {
+        const top=base.clone().add(new THREE.Vector3((rand()-.5)*1.2,.35+rand()*1.05,(rand()-.5)*.8));
+        batch.stem(base,top,.012);
+        if(i%3===0) batch.dahlia(top,.3+rand()*.12,dahliaColors,new THREE.Vector3(0,.2,1));
+        else batch.daisy(top,.2+rand()*.08,i%2?0xd18449:0xaa4e45,0x9a6c35,new THREE.Vector3(0,.2,1),9);
+      }
+      for(let i=0;i<4;i++) batch.amaranthus(base.clone().add(new THREE.Vector3((i-1.5)*.17,.9,(i-1.5)*.08)),.8+i*.12,[0x6f3440,0x873f49],{drift:side*.2});
+      for(let i=0;i<7;i++) batch.spike(base.clone().add(new THREE.Vector3((i-3)*.12,.1,(i%2)*.12)),.85+i*.1,[0xb99657,0x8c8550],{type:'delphinium',scale:.85});
+    }
+  }
+  // Copper urns frame an asymmetrical dahlia wall rather than a circular arch.
+  buildUrn(parent,[-3,0,-9],{color:0x9c5c37,metal:true});
+  buildUrn(parent,[3,0,-9],{color:0x9c5c37,metal:true});
+  const leftBase=new THREE.Vector3(-3,.95,-9),rightBase=new THREE.Vector3(3,.95,-9);
+  const recipe=[{type:'dahlia',color:0xaa4e45,colors:dahliaColors,size:.32},{type:'daisy',color:0xd18449,size:.2,petals:9},{type:'rose',color:0x7d3540,size:.25}];
+  batch.meadowCluster(leftBase,recipe,{count:42,width:1.35,depth:.75,height:2.4,baseY:0});
+  batch.meadowCluster(rightBase,recipe,{count:35,width:1.25,depth:.72,height:2.0,baseY:0});
+  for(let i=0;i<9;i++) batch.amaranthus(new THREE.Vector3(-3.7+i*.78,2.2+Math.sin(i)*.5,-9),1.0+(i%3)*.25,[0x6f3440,0x8d4750],{drift:(i-4)*.05});
+  batch.flush(parent);
+  addToolZone(parent,'harvest');
+}
+
+function buildWinterMoon(parent,config,registry,animationState) {
+  buildBase(parent,config,registry,animationState);
+  const frost=material(0xd9dedc,.93,0,{transparent:true,opacity:.18,depthWrite:false});
+  addPlane(parent,33,33,[0,.018,-4],frost);
+  const batch=new FloralBatch({seed:909,leafColors:[0x59665f,0x8e9a96,0xb1b9b6]});
+  const bark=0xc5c2b8;
+  // Birch arch assembled from real branch members.
+  const left=new THREE.Vector3(-2.25,.05,-9.4),right=new THREE.Vector3(2.25,.05,-9.4);
+  const topLeft=new THREE.Vector3(-1.25,4.5,-9.4),topRight=new THREE.Vector3(1.35,4.35,-9.4);
+  cylinderBetween(parent,left.toArray(),topLeft.toArray(),.11,material(bark,.92),10);
+  cylinderBetween(parent,right.toArray(),topRight.toArray(),.1,material(bark,.92),10);
+  cylinderBetween(parent,topLeft.toArray(),topRight.toArray(),.08,material(bark,.92),9);
+  for(let i=0;i<8;i++) {
+    const start=i<4?left.clone().lerp(topLeft,.45+i*.14):right.clone().lerp(topRight,.45+(i-4)*.14);
+    const end=start.clone().add(new THREE.Vector3((i<4?1:-1)*(.8+i%3*.25),.55+(i%2)*.4,(i%3-.8)*.3));
+    batch.blossomBranch(start,end,[0xf2f1ea,0xd8dedc],{count:5,radius:.02,branchColor:bark});
+  }
+  const recipe=[{type:'rose',color:0xf2f1ea,size:.25},{type:'anemone',color:0xd8dedc,size:.19},{type:'ranunculus',color:0xe5e4df,size:.21}];
+  floralIslands(batch,recipe,{rows:5,startHeight:.38,endHeight:.5,startCount:14,endCount:10});
+  batch.meadowCluster(new THREE.Vector3(-2.0,.02,-8.7),recipe,{count:30,width:1.1,depth:.65,height:1.15});
+  batch.meadowCluster(new THREE.Vector3(2.05,.02,-8.9),recipe,{count:28,width:1.05,depth:.62,height:1.1});
+  for(let row=0;row<6;row++) {
+    const z=5-row*2.25;
+    [-2.5,2.5].forEach((x)=>{
+      const lantern=buildLantern(parent,[x,0,z],{color:0x68716e,size:.44});
+      buildCandle(lantern,[0,.05,0],{height:.27,wax:0xe7e8e3,intensity:.3},animationState);
+    });
+  }
+  batch.flush(parent);
+  addToolZone(parent,'winter');
+}
+
+function buildIkebanaTheatre(parent,config,registry,animationState) {
+  buildBase(parent,config,registry,animationState);
+  const blackSteel=material(0x282c2a,.31,.63);
+  const batch=new FloralBatch({seed:1010,leafColors:[0x39483d,0x65705f]});
+  const placements=[
+    [-2.0,4.7,.72],[2.0,2.8,1.05],[-1.9,.8,1.25],[2.0,-1.3,.85],[-2.0,-3.5,1.1],[1.9,-5.7,1.35]
+  ];
+  placements.forEach(([x,z,height],index)=>{
+    addBox(parent,[1.25,height,.82],[x,height/2,z],blackSteel);
+    const basin=buildShallowBasin(parent,[x,height,z],{color:0x272a28,water:index%2?0x4c5c59:0x394b4b});
+    const base=new THREE.Vector3(x,height+.16,z);
+    const branchEnd=base.clone().add(new THREE.Vector3((index%2?-.8:.8)*(1.0+index*.08),1.35+index*.18,(index%3-.8)*.45));
+    batch.branch(base,branchEnd,.025,0x5f4637);
+    batch.blossomBranch(base.clone().lerp(branchEnd,.4),branchEnd,[0xe8dfd1,0xd6d2c2],{count:4,radius:.016,branchColor:0x5f4637});
+    for(let i=0;i<3;i++) {
+      const p=base.clone().add(new THREE.Vector3((i-1)*.25,.55+i*.35,(i%2-.5)*.28));
+      batch.stem(base,p,.012);
+      if(index%2===0) batch.calla(p,.38+i*.04,0xe8dfd1,0xc6a85c,new THREE.Vector3(index%2?-.2:.2,.3,1));
+      else batch.orchid(p,.3+i*.02,0xb7be89,0x754d39,new THREE.Vector3(index%2?-.2:.2,.2,1));
+    }
+    // A small moss pad is physically supported by the basin, not floating.
+    addSphere(parent,.32,[x,height+.19,z],material(0x53604a,.98),[1.35,.16,1.0],9);
+    void basin;
+  });
+  // Focal triptych at the end of the aisle.
+  [-2.3,0,2.3].forEach((x,index)=>{
+    const h=index===1?1.5:1.05;
+    addBox(parent,[1.55,h,1.0],[x,h/2,-9.0+(index%2)*.3],blackSteel);
+    buildShallowBasin(parent,[x,h,-9.0+(index%2)*.3],{color:0x242725,water:0x455656});
+    const base=new THREE.Vector3(x,h+.14,-9.0+(index%2)*.3);
+    const end=base.clone().add(new THREE.Vector3(index===0?2.0:index===2?-2.0:.5,2.2+index*.35,-.4));
+    batch.blossomBranch(base,end,[0xe8dfd1,0xb7be89],{count:7,radius:.032,branchColor:0x604638});
+    for(let i=0;i<5;i++) {
+      const p=base.clone().add(new THREE.Vector3((i-2)*.22,.65+i*.28,(i%2-.5)*.35));
+      batch.stem(base,p,.012);
+      if(i%2) batch.calla(p,.42,0xe8dfd1,0xc5a451,new THREE.Vector3(0,.3,1));
+      else batch.orchid(p,.34,0xb7be89,0x754d39,new THREE.Vector3(0,.2,1));
+    }
+  });
+  batch.flush(parent);
+  // Gallery spots have a structural track and targeted beams.
+  addBox(parent,[8,.08,.16],[0,5.8,-7.8],blackSteel);
+  [-2.4,0,2.4].forEach((x,index)=>{
+    const spot=new THREE.SpotLight(0xffd3a0,2.2,12,.4,.55,1.5);
+    spot.position.set(x,5.65,-7.7); spot.target.position.set(x*.7,1.2,-9); spot.castShadow=true;
+    parent.add(spot,spot.target);
+    addCylinder(parent,.13,.2,.24,[x,5.55,-7.65],blackSteel,16,[Math.PI/2,0,0]);
+  });
+  addToolZone(parent,'ikebana');
+}
+
+function buildPeakScene(config, registry, animationState) {
+  const world=new THREE.Group();
+  config.build(world,config,registry,animationState);
+  return world;
+}
+
+/* ===== MAIN.JS ===== */
+const app=document.querySelector('#app');
+const canvas=document.querySelector('#scene');
+const loading=document.querySelector('#loading');
+const fallback=document.querySelector('#fallback');
+const sceneNumber=document.querySelector('#sceneNumber');
+const sceneKicker=document.querySelector('#sceneKicker');
+const sceneTitle=document.querySelector('#sceneTitle');
+const sceneDescription=document.querySelector('#sceneDescription');
+const speciesList=document.querySelector('#speciesList');
+const sceneRail=document.querySelector('#sceneRail');
+const previousButton=document.querySelector('#previousButton');
+const nextButton=document.querySelector('#nextButton');
+const viewButton=document.querySelector('#viewButton');
+const viewLabel=document.querySelector('#viewLabel');
+const soundButton=document.querySelector('#soundButton');
+const infoButton=document.querySelector('#infoButton');
+const infoPanel=document.querySelector('#infoPanel');
+
+const state={
+  index:0,
