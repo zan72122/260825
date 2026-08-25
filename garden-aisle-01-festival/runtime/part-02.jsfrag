@@ -1,0 +1,127 @@
+      sky: '#74b7c0', fog: '#88b6ad', grass: '#3e7750', path: '#b8463f', path2: '#e2a331',
+      building: '#d2a36c', roof: '#9c3d32', chair: '#6b4b35', cushion: '#d84e4a', ribbon: '#e7a52f',
+      flowers: ['#dd3f57','#f17a45','#e0a52e','#8657a8','#3c8794'], leaves: ['#245e42','#4d8553'],
+      guests: ['#d94749','#f08a3e','#377b96','#8d4b95','#e0a532'], accent: '#c84843', accent2: '#e2a432',
+      decor: 'okinawa', light: [1.0,.78,.53], fogDensity: .020
+    },
+    {
+      number: 'A8', short: '収穫', kicker: 'FRUIT & HERB HARVEST PARTY', title: '果実とハーブの収穫パーティー',
+      description: '果樹、編み籠、色布、果実の屋台、フィドルとアコーディオンが、豊かで親しみやすい祝宴をつくります。',
+      features: ['果実のなる木々', '編み椅子＋色布', '果実と焼菓子の屋台', 'フィドル＋アコーディオン', '織物の小道', '木箱と陶器の飾り'],
+      sky: '#d3aa69', fog: '#b99b68', grass: '#658141', path: '#9b5f43', path2: '#d89b3f',
+      building: '#8f5a3c', roof: '#5b4033', chair: '#9a6b44', cushion: '#bd4c54', ribbon: '#d69d3f',
+      flowers: ['#bd3f58','#df6b3f','#d5a13a','#7453a0','#3c7f72'], leaves: ['#355f38','#6a8145'],
+      guests: ['#bd4650','#dc7a3f','#4d6f97','#7c4d8a','#b98734'], accent: '#a95a41', accent2: '#d69b3d',
+      decor: 'harvest', light: [.95,.68,.42], fogDensity: .021
+    },
+    {
+      number: 'A9', short: '天蓋', kicker: 'RIBBON CANOPY FESTIVAL', title: '空中リボン・カノピー',
+      description: '頭上を渡る長い色布、凧、リボンダンサー、グロッケンが、空まで祝っているような小道をつくります。',
+      features: ['頭上の色布カノピー', '小さな祝凧', 'リボンダンサー', 'グロッケン＋フルート', '円模様の舗装', '色違いの背もたれ布'],
+      sky: '#8ec3cc', fog: '#9bbcc0', grass: '#4e7d51', path: '#a95669', path2: '#e4a83f',
+      building: '#5e7182', roof: '#3b5167', chair: '#6d537f', cushion: '#d35c68', ribbon: '#e2a53c',
+      flowers: ['#d64e68','#eb7747','#7a5bb2','#dda43a','#3d8894'], leaves: ['#2e6645','#5d8755'],
+      guests: ['#d74d5f','#e68440','#4b7e9e','#8750a0','#d9a13c'], accent: '#a24f75', accent2: '#dca23c',
+      decor: 'canopy', light: [.9,.78,.68], fogDensity: .019
+    },
+    {
+      number: 'A10', short: '夕暮れ', kicker: 'TWILIGHT LANTERN MUSIC FESTIVAL', title: '夕暮れのランタン音楽祭',
+      description: '青い夕空、琥珀の卓上灯、深紅のラグ、ジャズ三重奏、くつろぐ参列者で、07の祝宴感を夜へ育てます。',
+      features: ['琥珀色の卓上灯', '深紅と青のラグ', 'ジャズ三重奏', '色クッションのラウンジ', '建物の窓灯り', '星形ではない実灯具'],
+      sky: '#536f8a', fog: '#566b78', grass: '#314f42', path: '#713f4d', path2: '#c58f3d',
+      building: '#4d4754', roof: '#303441', chair: '#714651', cushion: '#c75a58', ribbon: '#c89a4a',
+      flowers: ['#c74861','#e37147','#7754a6','#d09b3d','#397c87'], leaves: ['#234b38','#466b4c'],
+      guests: ['#c34c56','#dc7c41','#456b95','#814e91','#bd8738'], accent: '#a54e58', accent2: '#c99442',
+      decor: 'twilight', light: [.72,.56,.45], fogDensity: .030
+    },
+    {
+      number: 'A11', short: '噴水', kicker: 'FOUNTAIN DANCE CELEBRATION', title: '噴水とダンスの祝祭庭園',
+      description: '色タイルの噴水、金属花器、サックスと打楽器、踊る参列者が、通路の先に動きのある焦点をつくります。',
+      features: ['色タイルの噴水', '真鍮色の大花器', 'サックス＋打楽器', '踊る参列者', '幾何学舗装', '水辺の色ランタン'],
+      sky: '#85b7b4', fog: '#8ea9a3', grass: '#4d7650', path: '#3b7e82', path2: '#cf8846',
+      building: '#ae6a4b', roof: '#6b453c', chair: '#3f7070', cushion: '#d26056', ribbon: '#d89b3f',
+      flowers: ['#d64961','#e87843','#7d59a4','#d7a03a','#3d8790'], leaves: ['#2c6342','#5b8551'],
+      guests: ['#d34f55','#e4833d','#477899','#8a4b92','#d29a38'], accent: '#3d7e7f', accent2: '#d3943e',
+      decor: 'fountain', light: [.88,.78,.63], fogDensity: .021
+    },
+    {
+      number: 'A12', short: '大団円', kicker: 'BUBBLES & FANFARE FINALE', title: '泡とファンファーレの大団円',
+      description: '泡、色紙、旗、ラッパ、立ち上がる参列者が、設営完了の「ステキ！」を最も大きく見せます。',
+      features: ['泡を飛ばす小型機', '色紙と長い旗', 'トランペットのファンファーレ', '立ち上がる参列者', '色面を重ねた小道', '祝宴門の大きな幕'],
+      sky: '#e5a66e', fog: '#c9966f', grass: '#5e7f45', path: '#b6525d', path2: '#e2a33b',
+      building: '#a9544a', roof: '#69413b', chair: '#a9634b', cushion: '#d84e61', ribbon: '#e3a43c',
+      flowers: ['#d8425f','#ef7148','#7d56aa','#dda13a','#3c8493'], leaves: ['#32633f','#63854d'],
+      guests: ['#d84b57','#e77f3e','#41789a','#894d99','#dca03b'], accent: '#b64e59', accent2: '#dda13c',
+      decor: 'finale', light: [1.0,.68,.45], fogDensity: .019
+    }
+  ];
+
+  const state = {
+    index: Math.max(0, Math.min(variants.length - 1, (Number(new URLSearchParams(location.search).get('v')) || 1) - 1)),
+    viewWide: false,
+    soundOn: false,
+    audio: null,
+    pointerDown: false,
+    pointerStart: [0,0],
+    drag: 0,
+    parallax: [0,0],
+    parallaxTarget: [0,0],
+    cheer: 0,
+    cheerStart: -Infinity,
+    reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+    startTime: performance.now()
+  };
+
+  let gl;
+  let program;
+  let meshes = {};
+  let objects = [];
+  let opaque = [];
+  let transparent = [];
+  let currentVariant = variants[state.index];
+  let width = 1;
+  let height = 1;
+  let currentMesh = null;
+  let framePending = false;
+  let lastFrameTime = -Infinity;
+
+  const vertexShaderSource = `
+    attribute vec3 aPosition;
+    attribute vec3 aNormal;
+    uniform mat4 uProjection;
+    uniform mat4 uView;
+    uniform mat4 uModel;
+    uniform mat3 uNormalMatrix;
+    varying vec3 vNormal;
+    varying vec3 vWorld;
+    void main() {
+      vec4 world = uModel * vec4(aPosition, 1.0);
+      vWorld = world.xyz;
+      vNormal = normalize(uNormalMatrix * aNormal);
+      gl_Position = uProjection * uView * world;
+    }
+  `;
+
+  const fragmentShaderSource = `
+    precision mediump float;
+    varying vec3 vNormal;
+    varying vec3 vWorld;
+    uniform vec3 uColor;
+    uniform vec3 uCamera;
+    uniform vec3 uKeyDir;
+    uniform vec3 uKeyColor;
+    uniform vec3 uFillDir;
+    uniform vec3 uFillColor;
+    uniform vec3 uAmbient;
+    uniform vec3 uFogColor;
+    uniform float uFogDensity;
+    uniform float uRoughness;
+    uniform float uEmissive;
+    uniform float uAlpha;
+    void main() {
+      vec3 n = normalize(vNormal);
+      float key = max(dot(n, normalize(-uKeyDir)), 0.0);
+      float fill = max(dot(n, normalize(-uFillDir)), 0.0);
+      vec3 viewDir = normalize(uCamera - vWorld);
+      vec3 halfDir = normalize(viewDir - normalize(uKeyDir));
+      float shininess = mix(58.0, 7.0, clamp(uRoughness, 0.0, 1.0));
