@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#17130f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>大広間のクリスマスツリー</title>
+  <meta name="description" content="大きな生木を選び、運び、立て、固定し、灯りと飾りを付け、手入れして片付ける4歳児向け3D仕事体験ゲーム。" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app" class="app is-loading" data-screen="title" aria-busy="true">
+    <canvas id="scene" aria-label="Biltmore大広間とクリスマスツリーの3D作業場"></canvas>
+
+    <div id="fallback-scene" class="fallback-scene" aria-hidden="true">
+      <div class="fallback-wall fallback-wall--left"></div>
+      <div class="fallback-wall fallback-wall--right"></div>
+      <div class="fallback-window"><i></i><i></i><i></i></div>
+      <div class="fallback-organ"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="fallback-floor"></div>
+      <div class="fallback-tree"><i></i><i></i><i></i><i></i><b></b></div>
+      <div class="fallback-scaffold"></div>
+    </div>
+
+    <div class="film-grain" aria-hidden="true"></div>
+    <div class="edge-vignette" aria-hidden="true"></div>
+
+    <header id="game-header" class="game-header" hidden>
+      <button id="chapters-button" class="icon-button icon-button--wide" type="button" aria-label="仕事の地図を開く">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 7.5h8v7H5zm14 0h8v7h-8zM5 18h8v7H5zm14 0h8v7h-8z"/></svg>
+        <span>しごと</span>
+      </button>
+
+      <div class="chapter-head" aria-live="polite">
+        <span id="chapter-count" class="chapter-count">1 / 17</span>
+        <strong id="chapter-title" class="chapter-title">大広間をはかる</strong>
+      </div>
+
+      <div class="header-actions">
+        <button id="sound-button" class="icon-button" type="button" aria-label="音を切り替える" aria-pressed="true">
+          <svg class="sound-on" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12h6l7-6v20l-7-6H5zm17-2a9 9 0 0 1 0 12m3-16a14 14 0 0 1 0 20"/></svg>
+          <svg class="sound-off" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 12h6l7-6v20l-7-6H5zm18-1 6 6m0-6-6 6"/></svg>
+        </button>
+        <button id="pause-button" class="icon-button" type="button" aria-label="一時停止">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 7h5v18H9zm9 0h5v18h-5z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="title-screen" class="title-screen">
+      <section class="title-card">
+        <p class="title-overline">BILTMORE · BANQUET HALL</p>
+        <h1><span>大広間の</span>クリスマスツリー</h1>
+        <p class="title-lead">山の生木を選ぶところから、灯りをともし、手入れし、片付けるところまで。</p>
+
+        <div class="title-facts" aria-label="ゲームの特徴">
+          <span><b>35 ft</b>級の生木</span>
+          <span><b>17</b>の実作業</span>
+          <span><b>指</b>で持つ・運ぶ・作る</span>
+        </div>
+
+        <div class="title-actions">
+          <button id="new-game-button" class="primary-button" type="button">
+            <span class="primary-button__disc" aria-hidden="true">
+              <svg viewBox="0 0 32 32"><path d="M11 7v18l14-9z"/></svg>
+            </span>
+            <span><small>さいしょから</small><strong>しごとを はじめる</strong></span>
+          </button>
+          <button id="continue-button" class="secondary-button" type="button" hidden>
+            <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 16a9 9 0 1 0 3-6.7M7 5v7h7"/></svg>
+            <span><small>つづきから</small><strong id="continue-label">大広間をはかる</strong></span>
+          </button>
+        </div>
+
+        <p class="title-note">読み上げを使わなくても、手・道具・動きで分かるように作っています。</p>
+      </section>
+
+      <aside class="arrival-caption" aria-hidden="true">
+        <span></span>
+        <p><b>朝 7:10</b><br />床養生と道具の確認から始まる</p>
+      </aside>
+    </main>
+
+    <section id="hud" class="hud" hidden aria-live="polite">
+      <div class="task-card">
+        <div id="task-icon" class="task-icon" aria-hidden="true"></div>
+        <div class="task-copy">
+          <p id="task-step" class="task-step">1つめ</p>
+          <h2 id="task-instruction">黄色いメジャーを、上へ長くのばそう</h2>
+          <p id="task-detail">天井までの高さを、床から測ります。</p>
+        </div>
+        <div class="task-progress" aria-label="この仕事の進み具合">
+          <svg viewBox="0 0 42 42" aria-hidden="true">
+            <circle class="task-progress__track" cx="21" cy="21" r="16" />
+            <circle id="task-progress-ring" class="task-progress__value" cx="21" cy="21" r="16" />
+          </svg>
+          <span id="task-progress-label">0%</span>
+        </div>
+      </div>
+
+      <div id="gesture-guide" class="gesture-guide" aria-hidden="true">
+        <div id="gesture-path" class="gesture-path"></div>
+        <div id="gesture-hand" class="gesture-hand"><i></i></div>
+      </div>
+
+      <div class="work-controls">
+        <button id="hint-button" class="tool-button" type="button">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4a9 9 0 0 0-5 16.5V25h10v-4.5A9 9 0 0 0 16 4Zm-5 24h10"/></svg>
+          <span>てつだい</span>
+        </button>
+        <button id="repeat-button" class="tool-button" type="button">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 8h14l-3-3m3 3-3 3M24 24H10l3 3m-3-3 3-3"/></svg>
+          <span>もういちど</span>
+        </button>
+      </div>
+    </section>
+
+    <div id="interaction-layer" class="interaction-layer" aria-label="作業する場所"></div>
+
+    <div id="feedback" class="feedback" role="status" aria-live="assertive"></div>
+    <div id="save-chip" class="save-chip" role="status">きろくしました</div>
+
+    <section id="chapter-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="chapter-sheet-title" hidden>
+      <div class="sheet__scrim" data-close-sheet></div>
+      <article class="sheet__panel sheet__panel--chapters">
+        <header class="sheet__header">
+          <div>
+            <p>THE WHOLE JOB</p>
+            <h2 id="chapter-sheet-title">一本の木が、祝う場所になるまで</h2>
+          </div>
+          <button class="sheet__close" type="button" data-close-sheet aria-label="閉じる">×</button>
+        </header>
+        <ol id="chapter-list" class="chapter-list"></ol>
+      </article>
+    </section>
+
+    <section id="pause-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+      <div class="sheet__scrim"></div>
+      <article class="sheet__panel sheet__panel--pause">
+        <p class="sheet__eyebrow">PAUSED</p>
+        <h2 id="pause-title">ひとやすみ</h2>
+        <p>今の仕事のはじめから、いつでも続けられます。</p>
+        <button id="resume-button" class="primary-button primary-button--compact" type="button"><strong>つづける</strong></button>
+        <button id="title-button" class="secondary-button secondary-button--plain" type="button">トップにもどる</button>
+      </article>
+    </section>
+
+    <section id="chapter-complete" class="chapter-complete" role="status" hidden>
+      <div class="chapter-complete__seal" aria-hidden="true">✓</div>
+      <p>ひとつ、ほんものに近づいた</p>
+      <h2 id="complete-title">大広間をはかりました</h2>
+      <div id="complete-change" class="complete-change">天井・入口・床の広さが分かりました。</div>
+    </section>
+
+    <section id="ending-screen" class="ending-screen" hidden>
+      <article class="ending-card">
+        <p class="ending-overline">ONE SEASON · ONE COMPLETE CYCLE</p>
+        <h2>一本の木を、最後まで見届けた</h2>
+        <p>選ぶ、運ぶ、立てる、飾る、守る、片付ける。大広間は静かになり、道具と飾りは次の冬を待っています。</p>
+        <div class="ending-ledger">
+          <span><b id="ending-jobs">17</b> しごと</span>
+          <span><b id="ending-actions">0</b> てのうごき</span>
+          <span><b id="ending-time">0:00</b> たいけん</span>
+        </div>
+        <div class="ending-actions">
+          <button id="replay-button" class="primary-button primary-button--compact" type="button"><strong>もういちど つくる</strong></button>
+          <button id="finished-view-button" class="secondary-button secondary-button--plain" type="button">完成した夜を見る</button>
+        </div>
+      </article>
+    </section>
+
+    <div id="loading" class="loading" role="status">
+      <span class="loading__ring"></span>
+      <p><b>大広間を準備しています</b><small>石、木、鉄、枝、道具を組み立てています</small></p>
+    </div>
+
+    <div id="fatal-error" class="fatal-error" hidden>
+      <h2>3Dを始められませんでした</h2>
+      <p>ネット接続とWebGLを確認して、ページを読み込み直してください。</p>
+      <button type="button" onclick="location.reload()">もう一度ためす</button>
+    </div>
+
+    <pre id="autotest-report" class="autotest-report" hidden></pre>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
