@@ -1,0 +1,239 @@
+function createCableReel(parent, options = {}) {
+  const group = new THREE.Group();
+  group.position.copy(options.position ?? new THREE.Vector3());
+  group.rotation.y = options.rotationY ?? 0;
+  parent.add(group);
+  const wood = standardMaterial(options.wood ?? 0x766047, .88, 0);
+  const cable = standardMaterial(options.cable ?? 0x202725, .82, .12);
+  const left = addCylinder(group, .48, .48, .08, new THREE.Vector3(-.31, .5, 0), wood, 20, new THREE.Euler(0, 0, Math.PI / 2)); left.rotation.z = Math.PI / 2;
+  const right = addCylinder(group, .48, .48, .08, new THREE.Vector3(.31, .5, 0), wood, 20, new THREE.Euler(0, 0, Math.PI / 2)); right.rotation.z = Math.PI / 2;
+  const core = addCylinder(group, .23, .23, .62, new THREE.Vector3(0, .5, 0), cable, 18, new THREE.Euler(0, 0, Math.PI / 2)); core.rotation.z = Math.PI / 2;
+  addCylinder(group, .045, .045, 1.05, new THREE.Vector3(0, .5, 0), standardMaterial(0x444949, .42, .68), 10, new THREE.Euler(0, 0, Math.PI / 2)).rotation.z = Math.PI / 2;
+  return group;
+}
+
+function createDistributionBox(parent, options = {}) {
+  const group = new THREE.Group();
+  group.position.copy(options.position ?? new THREE.Vector3());
+  group.rotation.y = options.rotationY ?? 0;
+  parent.add(group);
+  const steel = standardMaterial(options.color ?? 0x485451, .52, .58);
+  addBox(group, new THREE.Vector3(.9, 1.15, .38), new THREE.Vector3(0, .58, 0), steel);
+  const door = addBox(group, new THREE.Vector3(.76, .92, .035), new THREE.Vector3(0, .62, .21), standardMaterial(0x596562, .58, .5));
+  door.castShadow = false;
+  const colors = [0xb34a3b, 0xc4a149, 0x4e7b68, 0x3f566d];
+  for (let i = 0; i < 4; i += 1) addCylinder(group, .045, .045, .03, new THREE.Vector3(-.25 + i * .17, .72, .25), standardMaterial(colors[i], .4, .2), 10, new THREE.Euler(Math.PI / 2, 0, 0));
+  for (let i = 0; i < 3; i += 1) addBox(group, new THREE.Vector3(.16, .08, .04), new THREE.Vector3(-.2 + i * .2, .45, .25), standardMaterial(0x282e2d, .52, .55)).castShadow = false;
+  return group;
+}
+
+function createGlassmakingBench(parent, options = {}) {
+  const group = new THREE.Group();
+  group.position.copy(options.position ?? new THREE.Vector3());
+  group.rotation.y = options.rotationY ?? 0;
+  parent.add(group);
+  const iron = standardMaterial(0x373b3c, .42, .76);
+  const wood = standardMaterial(0x5e4837, .86, 0);
+  addBox(group, new THREE.Vector3(4.6, .18, 1.35), new THREE.Vector3(0, 1.02, 0), wood);
+  for (const x of [-2.05, 2.05]) for (const z of [-.5, .5]) addBox(group, new THREE.Vector3(.12, 1, .12), new THREE.Vector3(x, .5, z), iron);
+  for (let i = 0; i < 5; i += 1) {
+    const rod = addCylinder(group, .022, .022, 3.1, new THREE.Vector3(-1.55 + i * .75, 1.18, .04), iron, 8, new THREE.Euler(0, 0, Math.PI / 2));
+    rod.rotation.z = Math.PI / 2;
+  }
+  const glassColors = [0xbd4b3d, 0xd9b557, 0x6d9792, 0xe7e4db];
+  for (let i = 0; i < 8; i += 1) {
+    const glass = physicalMaterial(glassColors[i % glassColors.length], .07, .02, { transmission: .26, transparent: true, opacity: .72, clearcoat: .75 });
+    addSphere(group, .12 + (i % 3) * .02, new THREE.Vector3(-1.65 + (i % 4) * 1.05, 1.28, -.35 + Math.floor(i / 4) * .65), glass, 16);
+  }
+  return group;
+}
+
+function addCandles(parent, options = {}) {
+  const origin = options.position ?? new THREE.Vector3();
+  const count = options.count ?? 5;
+  const wax = standardMaterial(options.wax ?? 0xe3d7bd, .82, 0);
+  const holder = standardMaterial(options.holder ?? 0xa98950, .34, .72);
+  for (let i = 0; i < count; i += 1) {
+    const x = origin.x + (i - (count - 1) / 2) * .46;
+    const h = .46 + (i % 3) * .13;
+    addCylinder(parent, .045, .055, h, new THREE.Vector3(x, origin.y + h / 2, origin.z), wax, 12);
+    addCylinder(parent, .1, .1, .035, new THREE.Vector3(x, origin.y + .018, origin.z), holder, 12);
+    addPracticalPointLight(parent, new THREE.Vector3(x, origin.y + h + .08, origin.z), 0xff9d48, .55, 2.4, .026, true);
+  }
+}
+
+function createPicnicTable(parent, options = {}) {
+  const group = new THREE.Group();
+  group.position.copy(options.position ?? new THREE.Vector3());
+  group.rotation.y = options.rotationY ?? 0;
+  parent.add(group);
+  const wood = standardMaterial(options.color ?? 0x8a6345, .84, 0);
+  addBox(group, new THREE.Vector3(3.5, .12, 1.15), new THREE.Vector3(0, 1.05, 0), wood);
+  addBox(group, new THREE.Vector3(3.8, .12, .42), new THREE.Vector3(0, .58, 1.05), wood);
+  addBox(group, new THREE.Vector3(3.8, .12, .42), new THREE.Vector3(0, .58, -1.05), wood);
+  for (const x of [-1.25, 1.25]) {
+    const leg1 = addBox(group, new THREE.Vector3(.15, 1.2, .15), new THREE.Vector3(x, .55, .46), wood); leg1.rotation.x = -.26;
+    const leg2 = addBox(group, new THREE.Vector3(.15, 1.2, .15), new THREE.Vector3(x, .55, -.46), wood); leg2.rotation.x = .26;
+  }
+  return group;
+}
+
+function addRainPuddles(parent, options = {}) {
+  const random = mulberry32(options.seed ?? 321);
+  const material = physicalMaterial(options.color ?? 0x4f696c, .05, 0, { transparent: true, opacity: .58, clearcoat: .8, depthWrite: false });
+  for (let i = 0; i < (options.count ?? 14); i += 1) {
+    const puddle = addDisc(parent, range(random, .2, .78), new THREE.Vector3(range(random, options.xMin ?? -10, options.xMax ?? 10), .017, range(random, options.zMin ?? -7, options.zMax ?? 8)), material);
+    puddle.scale.set(range(random, .7, 2), range(random, .55, 1.1), 1);
+    puddle.rotation.z = random() * Math.PI;
+  }
+}
+
+function buildCzechGlassWorkshop() {
+  const root = makeWorld();
+  configureScene({ background: 0x231b17, fog: { color: 0x4f372a, density: .015 }, exposure: .93, cameraPosition: new THREE.Vector3(13.5, 5.3, 18.2), target: new THREE.Vector3(.4, 3.1, -.7), fov: 38 });
+  createGlassWorkshop(root);
+  addAmbientRig(root, { sky: 0x544c49, ground: 0x2b211b, hemi: .53, keyColor: 0xff7b35, key: 2.4, keyPosition: new THREE.Vector3(8, 6, -2), fillColor: 0x69808d, fillIntensity: .25 });
+  const stand = createTreeStand(root, { position: new THREE.Vector3(1.3, .02, -2), radius: .62, legLength: 1.2, weights: false, steelColor: 0x414747 });
+  const tree = createFraserFir(root, { x: 1.3, z: -2, height: 5.2, radius: 1.95, seed: 80, density: .83, foliageColor: 0x173a2b, foliageColor2: 0x2b513c });
+  decorateTree(tree.group, tree, { seed: 811, count: 45, ornaments: [0xb83e36, 0xd5ae50, 0x6a9190, 0xd9e0dc], ornamentSize: .115, lightColor: 0xffbf72, lightRings: 4, ribbon: false });
+  addTreeTopper(tree.group, tree, { color: 0xd2a444, size: .42, metalness: .55 });
+  createGlassmakingBench(root, { position: new THREE.Vector3(-4.5, 0, 3.8), rotationY: .12 });
+  createCrate(root, { position: new THREE.Vector3(-7.5, 0, 1.2), rotationY: .3, size: new THREE.Vector3(1.9, .95, 1.15), open: true, color: 0x60442d, edgeColor: 0x3f2d20 });
+  createWorker(root, { position: new THREE.Vector3(6.2, 0, -.6), rotationY: -1.3, scale: .9, clothing: 0x4a3429, trousers: 0x2c2927, armRaise: .5 });
+  const iron = standardMaterial(0x333738, .4, .75);
+  const blowPipe = addCylinder(root, .022, .022, 3.8, new THREE.Vector3(5.55, 1.28, -.5), iron, 8, new THREE.Euler(0, 0, Math.PI / 2)); blowPipe.rotation.z = Math.PI / 2;
+  const moltenGlass = physicalMaterial(0xff7b2a, .08, 0, { emissive: 0xff4b12, emissiveIntensity: 3, transparent: true, opacity: .9 });
+  addSphere(root, .17, new THREE.Vector3(3.65, 1.28, -.5), moltenGlass, 18);
+  return root;
+}
+
+function buildLoireSalon() {
+  const root = makeWorld();
+  configureScene({ background: 0x221618, fog: { color: 0x493334, density: .013 }, exposure: .87, cameraPosition: new THREE.Vector3(13.2, 5.6, 17.4), target: new THREE.Vector3(1.4, 3.4, -1.8), fov: 37 });
+  createLoireSalon(root);
+  addAmbientRig(root, { sky: 0x585255, ground: 0x23191a, hemi: .42, keyColor: 0xffa35d, key: 1.75, keyPosition: new THREE.Vector3(-6, 6, -4), fillColor: 0x667a8b, fillIntensity: .18 });
+  const stand = createTreeStand(root, { position: new THREE.Vector3(2.2, .02, -2), radius: .7, legLength: 1.2, weights: false, steelColor: 0x443b35 });
+  const tree = createFraserFir(root, { x: 2.2, z: -2, height: 5.8, radius: 2.15, seed: 921, density: .94, foliageColor: 0x173627, foliageColor2: 0x31503a });
+  decorateTree(tree.group, tree, { seed: 105, count: 59, ornaments: [0x812832, 0xb89558, 0xd8cfba, 0x7f6954], ornamentSize: .105, lightColor: 0xffb867, lightRings: 5, ribbon: true, ribbonColor: 0x6f1f2d, ribbonWidth: .045 });
+  addTreeTopper(tree.group, tree, { color: 0xb99658, size: .46, metalness: .62 });
+  addCandles(root, { position: new THREE.Vector3(-1.2, .8, 2.2), count: 5, wax: 0xe3d3b3, holder: 0x9a7845 });
+  const consoleMaterial = standardMaterial(0x4b2e25, .77, 0);
+  addBox(root, new THREE.Vector3(4.5, .16, 1), new THREE.Vector3(-1.2, .78, 2.2), consoleMaterial);
+  for (const x of [-1.8, 1.8]) addCylinder(root, .08, .12, .75, new THREE.Vector3(-1.2 + x, .38, 2.2), consoleMaterial, 10);
+  createStepLadder(root, { position: new THREE.Vector3(5.7, 0, .9), rotationY: -.6, height: 1.9, color: 0x5d544b });
+  createOrnamentTray(root, { position: new THREE.Vector3(-4.8, .03, 3.9), rotationY: .18, seed: 70, palette: [0x842b34, 0xb99758, 0xd9cfb8, 0x79634e], wood: 0x5b372a, felt: 0x4c2026 });
+  addWrappedBoxes(root, { position: new THREE.Vector3(2.3, 0, .4), count: 6, seed: 61, colors: [0x792832, 0x3b4c38, 0xa78650, 0xc8bda7] });
+  return root;
+}
+
+function buildLaplandRaising() {
+  const root = makeWorld();
+  configureScene({ background: 0x4d6f82, fog: { color: 0x7893a0, density: .018 }, exposure: 1.03, cameraPosition: new THREE.Vector3(15.5, 5.2, 20.5), target: new THREE.Vector3(0, 3.2, 0), fov: 39 });
+  createLaplandSnowfield(root);
+  addAmbientRig(root, { sky: 0x98b7c6, ground: 0x6a7f86, hemi: 1.03, keyColor: 0xffc081, key: 2.2, keyPosition: new THREE.Vector3(-14, 5, 4), fillColor: 0x779eb5, fillIntensity: .55 });
+  createSled(root, { position: new THREE.Vector3(-3.2, 0, 2.7), rotationY: .15 });
+  const tree = createFraserFir(root, { x: -1.4, z: .9, height: 7.5, radius: 2.65, seed: 608, density: .82, foliageColor: 0x1d4037, foliageColor2: 0x31574a, trunkCutVisible: true });
+  tree.group.rotation.z = -deg(34);
+  tree.group.rotation.y = .16;
+  const stand = createTreeStand(root, { position: new THREE.Vector3(2.5, .02, -.35), radius: .82, legLength: 1.5, weights: true, steelColor: 0x3f484a });
+  const ropeMaterial = standardMaterial(0x8b765b, .9, 0);
+  const ropeStart = new THREE.Vector3(1.35, 5.5, .2);
+  const ropeEnd = new THREE.Vector3(8.5, .75, 3.5);
+  addTube(root, [ropeStart, new THREE.Vector3(4.5, 3.7, 1.4), ropeEnd], .035, ropeMaterial, 28, 7);
+  const secondStart = new THREE.Vector3(.8, 4.4, -.5);
+  const secondEnd = new THREE.Vector3(7.3, .75, -4.2);
+  addTube(root, [secondStart, new THREE.Vector3(3.7, 3.1, -2), secondEnd], .03, ropeMaterial, 25, 7);
+  createWorker(root, { position: new THREE.Vector3(8.6, 0, 3.5), rotationY: -2.05, scale: .96, clothing: 0x8b3535, trousers: 0x333b42, armRaise: .55 });
+  createWorker(root, { position: new THREE.Vector3(7.4, 0, -4.1), rotationY: 2.4, scale: .92, clothing: 0x314e61, trousers: 0x30373a, armRaise: .55 });
+  createWorker(root, { position: new THREE.Vector3(1.1, 0, -1.5), rotationY: .5, scale: .94, clothing: 0x4a5538, trousers: 0x32393a, armRaise: .35 });
+  createWorker(root, { position: new THREE.Vector3(-5.2, 0, 2.8), rotationY: 1.2, scale: .88, clothing: 0x5a3845, trousers: 0x2f3539 });
+  const redMark = standardMaterial(0xbb3d35, .82, 0);
+  addTube(tree.group, [new THREE.Vector3(-.25, 1.2, 0), new THREE.Vector3(.25, 1.2, 0)], .045, redMark, 8, 6);
+  worldUpdate = (elapsed) => {
+    const tension = Math.sin(elapsed * .8) * .0015;
+    tree.group.rotation.z = -deg(34) + tension;
+  };
+  return root;
+}
+
+function buildAucklandGarden() {
+  const root = makeWorld();
+  configureScene({ background: 0x77a4b1, fog: { color: 0x9bb8b9, density: .006 }, exposure: 1.14, cameraPosition: new THREE.Vector3(14.2, 5.7, 19), target: new THREE.Vector3(1, 2.7, 1), fov: 40 });
+  createAucklandGarden(root);
+  addAmbientRig(root, { sky: 0x9acbd7, ground: 0x51673e, hemi: 1.18, keyColor: 0xffe2a9, key: 4.2, keyPosition: new THREE.Vector3(-9, 14, 7), fillColor: 0x80a8ad, fillIntensity: .42 });
+  const stand = createTreeStand(root, { position: new THREE.Vector3(2, .04, 1.1), radius: .58, legLength: 1.1, weights: true, steelColor: 0x555d59 });
+  const tree = createFraserFir(root, { x: 2, z: 1.1, height: 4.5, radius: 1.75, seed: 1212, density: .9, foliageColor: 0x1e4933, foliageColor2: 0x39634a });
+  decorateTree(tree.group, tree, { seed: 212, count: 42, ornaments: [0xc94f3d, 0xe3b548, 0x4b8a83, 0xe7dfc5], ornamentSize: .1, lightColor: 0xffd28c, lightRings: 4, ribbon: true, ribbonColor: 0xc9694c, ribbonWidth: .032, lightIntensity: 1.4 });
+  addTreeTopper(tree.group, tree, { color: 0xd3a643, size: .38, metalness: .4 });
+  createPicnicTable(root, { position: new THREE.Vector3(-4.2, 0, 3.2), rotationY: .17, color: 0x8c6748 });
+  createOrnamentTray(root, { position: new THREE.Vector3(-4.1, 1.2, 3.2), rotationY: .17, seed: 23, palette: [0xc64f3d, 0xdfb342, 0x4d8a83, 0xe5d9bd], wood: 0x7b5c42, felt: 0x53654e });
+  addWrappedBoxes(root, { position: new THREE.Vector3(2.7, 0, 3.4), count: 5, seed: 95, colors: [0xc54a3a, 0x3d735e, 0xddb14a, 0xe1d4b8] });
+  createWorker(root, { position: new THREE.Vector3(5.1, 0, 3.7), rotationY: -2.3, scale: .86, clothing: 0xe1d0a9, trousers: 0x596b63, armRaise: .25 });
+  return root;
+}
+
+function buildEdinburghStation() {
+  const root = makeWorld();
+  configureScene({ background: 0x304148, fog: { color: 0x53656b, density: .015 }, exposure: .98, cameraPosition: new THREE.Vector3(16.5, 6.3, 22), target: new THREE.Vector3(0, 4, -1.8), fov: 37 });
+  createEdinburghStation(root);
+  addRainPuddles(root, { seed: 77, count: 17, xMin: -14, xMax: 14, zMin: -8, zMax: 7, color: 0x5c7477 });
+  addAmbientRig(root, { sky: 0x71878f, ground: 0x283538, hemi: .86, keyColor: 0x8ca8b1, key: 1.35, keyPosition: new THREE.Vector3(-10, 16, 8), fillColor: 0xffbb69, fillIntensity: .38 });
+  const stand = createTreeStand(root, { position: new THREE.Vector3(0, .03, -1.8), radius: .92, legLength: 1.7, weights: true, steelColor: 0x394646 });
+  const tree = createFraserFir(root, { x: 0, z: -1.8, height: 8, radius: 2.8, seed: 1884, density: .86, foliageColor: 0x153c2e, foliageColor2: 0x2a5641 });
+  decorateTree(tree.group, tree, { seed: 13, count: 72, ornaments: [0x8b2f35, 0xb7964f, 0xcfd4cf, 0x355c58], ornamentSize: .12, lightColor: 0xffbe72, lightRings: 7, ribbon: true, ribbonColor: 0x7e2d34, ribbonWidth: .043 });
+  addTreeTopper(tree.group, tree, { color: 0xc09c50, size: .55, metalness: .55 });
+  createSafetyBarrier(root, { position: new THREE.Vector3(0, 0, 2.9), length: 7.5, color: 0x9b7e42 });
+  createTrolley(root, { position: new THREE.Vector3(-5.8, 0, 4.1), rotationY: .33, deckColor: 0x485452 });
+  createCrate(root, { position: new THREE.Vector3(-5.5, .47, 4), rotationY: .33, size: new THREE.Vector3(1.65, .84, 1.1), open: true, color: 0x66513a, edgeColor: 0x40352a, label: true });
+  createCableReel(root, { position: new THREE.Vector3(5.2, 0, 3.6), rotationY: -.25, cable: 0x202726 });
+  createWorker(root, { position: new THREE.Vector3(4.4, 0, 2.3), rotationY: 2.8, scale: .9, clothing: 0x475c5f, trousers: 0x2f383b, hardHat: true, hardHatColor: 0xd9b14d });
+  createWorker(root, { position: new THREE.Vector3(-3.5, 0, .9), rotationY: 1.3, scale: .88, clothing: 0x653a3f, trousers: 0x30383a, hardHat: true, hardHatColor: 0xd9b14d });
+  return root;
+}
+
+function buildKyotoMachiya() {
+  const root = makeWorld();
+  configureScene({ background: 0x514b42, fog: { color: 0x6a6256, density: .007 }, exposure: .96, cameraPosition: new THREE.Vector3(10.8, 4.1, 14.5), target: new THREE.Vector3(.8, 2.1, -1.5), fov: 40 });
+  createKyotoMachiya(root);
+  addAmbientRig(root, { sky: 0xa2a8a3, ground: 0x4b4033, hemi: .82, keyColor: 0xe5dfca, key: 2.05, keyPosition: new THREE.Vector3(-6, 7, -1), fillColor: 0xffc37e, fillIntensity: .3 });
+  const protect = standardMaterial(0x4f4337, .96, 0);
+  addBox(root, new THREE.Vector3(4.2, .045, 4.1), new THREE.Vector3(1.6, .11, -1.6), protect);
+  const stand = createTreeStand(root, { position: new THREE.Vector3(1.6, .14, -1.6), radius: .4, legLength: .76, weights: false, steelColor: 0x413d36 });
+  const tree = createFraserFir(root, { x: 1.6, z: -1.6, baseY: .12, height: 3, radius: 1.22, seed: 1314, density: 1.02, foliageColor: 0x214635, foliageColor2: 0x3b5e49 });
+  decorateTree(tree.group, tree, { seed: 114, count: 25, ornaments: [0xb45748, 0xc99d61, 0xe4decf, 0x667a6c], ornamentSize: .075, lightColor: 0xffc686, lightRings: 3, ribbon: false, bulbSize: .023, cordRadius: .007 });
+  addTreeTopper(tree.group, tree, { color: 0xd8c59f, size: .24, metalness: .02, offsetY: .3, points: 8 });
+  for (let i = 0; i < 18; i += 1) {
+    const anchor = tree.ornamentAnchors[(i * 4 + 1) % tree.ornamentAnchors.length];
+    createPaperOrnament(tree.group, anchor, [0xd8c8a6, 0xb75d4e, 0x768276][i % 3], .3 + (i % 3) * .04);
+  }
+  createOrnamentTray(root, { position: new THREE.Vector3(-2.1, .12, 2.2), rotationY: .08, seed: 19, palette: [0xb45a4b, 0xd2bd94, 0x6f8072], wood: 0x594433, felt: 0x8c7f67 });
+  createStepLadder(root, { position: new THREE.Vector3(4.4, .12, 1), rotationY: -.45, height: 1.12, color: 0x5f5244 });
+  addWrappedBoxes(root, { position: new THREE.Vector3(2.1, .12, .6), count: 4, seed: 22, colors: [0xa85145, 0x617365, 0xc4a36a, 0xd8cdb7] });
+  return root;
+}
+
+function buildTechnicalCutaway() {
+  const root = makeWorld();
+  configureScene({ background: 0x1e2927, fog: { color: 0x34403e, density: .008 }, exposure: 1.06, cameraPosition: new THREE.Vector3(16.5, 7.6, 21), target: new THREE.Vector3(1.2, 4.2, -1), fov: 35 });
+  createTechnicalBay(root);
+  addAmbientRig(root, { sky: 0xc5d5d1, ground: 0x293330, hemi: 1.12, keyColor: 0xf4f2df, key: 2.8, keyPosition: new THREE.Vector3(-8, 15, 8), fillColor: 0x8ba8a2, fillIntensity: .62 });
+  addFloorProtection(root, new THREE.Vector3(2.2, .02, -1.1), 7.7, 6.8, 0);
+  const stand = createTreeStand(root, { position: new THREE.Vector3(2.2, .05, -1.1), radius: 1, legLength: 2.1, weights: true, steelColor: 0x4e5b58 });
+  const tree = createFraserFir(root, { x: 2.2, z: -1.1, height: 7.8, radius: 2.75, seed: 404, density: .58, foliageColor: 0x1c4c38, foliageColor2: 0x44705a, trunkColor: 0x5a3e28, trunkCutVisible: true });
+  decorateTree(tree.group, tree, { seed: 99, count: 34, ornaments: [0xd8b35b, 0xbfc9c5, 0x5c8478], ornamentSize: .1, lightColor: 0xffd38b, lightRings: 6, ribbon: false, cordColor: 0x202a27, cordRadius: .016, lightIntensity: 3.2 });
+  addGuyWires(tree.group, tree.height, [new THREE.Vector3(-4.1, .1, -3.1), new THREE.Vector3(4.3, .1, -3), new THREE.Vector3(-4.1, .1, 3), new THREE.Vector3(4.3, .1, 3.1)], { topY: 5.55, radius: .016, color: 0x687572 });
+  const envelopeMaterial = new THREE.MeshBasicMaterial({ color: 0xe2aa43, wireframe: true, transparent: true, opacity: .22, depthWrite: false });
+  const envelope = new THREE.Mesh(new THREE.ConeGeometry(3.2, 8.2, 24, 8, true), envelopeMaterial);
+  envelope.position.set(2.2, 4.15, -1.1);
+  root.add(envelope);
+  createScaffold(root, { position: new THREE.Vector3(6.3, 0, 1.9), rotationY: -.2, levels: 3, width: 2.1, depth: 1.15, levelHeight: 1.45, color: 0x697572 });
+  addMeasurementPole(root, { position: new THREE.Vector3(-1.8, 0, -1.1), height: 8.5 });
+  createCableReel(root, { position: new THREE.Vector3(-5.4, 0, 4), rotationY: .2, cable: 0x1d2724 });
+  createDistributionBox(root, { position: new THREE.Vector3(-7, 0, 3.5), rotationY: .12, color: 0x4e5d59 });
+  createCrate(root, { position: new THREE.Vector3(-4.2, 0, 1.2), rotationY: -.12, size: new THREE.Vector3(1.75, .86, 1.1), open: true, label: true, color: 0x6c5c45, edgeColor: 0x434038 });
+  createLongPole(root, { position: new THREE.Vector3(-2.7, 0, 4.6), rotationZ: -.22, rotationY: .12, length: 4.9, color: 0x8f6e4d });
+  const cablePathMaterial = standardMaterial(0xe1a93f, .46, .28);
+  addTube(root, [new THREE.Vector3(-6.5, .22, 3.5), new THREE.Vector3(-2, .12, 3.2), new THREE.Vector3(.4, .14, 1.5), new THREE.Vector3(2.2, .3, -1.1)], .025, cablePathMaterial, 36, 6);
+  createWorker(root, { position: new THREE.Vector3(-2.4, 0, 2.1), rotationY: .8, scale: .9, clothing: 0x445451, trousers: 0x2b3332, hardHat: true, hardHatColor: 0xe0ad45 });
+  return root;
+}
