@@ -4,7 +4,9 @@
 
 ## Macでの起動方法
 
-**まだ `260825` をcloneしていない場合**は、Terminalで次を上から順に実行してください。
+### まだ `260825` をcloneしていない場合
+
+Terminalで次を上から順に実行してください。
 
 ```bash
 cd ~
@@ -21,7 +23,7 @@ http://localhost:4173/
 
 ## すでに `260825` をclone済みの場合
 
-以前cloneしたフォルダには、新しく追加した `a2-full-wedding-game` がまだ無い可能性があります。その場合はcloneし直すか、次を実行してください。
+今回の「会場と花材を準備しています」が終わらない問題の修正を取得するため、必ず最新版へ更新してください。
 
 ```bash
 cd ~/260825
@@ -36,7 +38,7 @@ python3 -m http.server 4173
 
 ## パス確認
 
-サーバー起動前に、以下で3ファイルが見えれば正しい場所です。
+サーバー起動前に以下を実行します。
 
 ```bash
 pwd
@@ -49,9 +51,25 @@ ls
 .../260825/a2-full-wedding-game
 README.md
 app.js
+bootstrap.js
 index.html
 styles.css
+three-bridge.js
 ```
+
+## 起動が止まらないための対策
+
+旧版は `app.js` が jsDelivr 上の Three.js を静的 import していたため、その通信が止まるとアプリ側の例外処理へ到達できず、ローディング表示が残り続ける問題がありました。
+
+現行版では次の対策を入れています。
+
+- `bootstrap.js` が起動全体を監視
+- Three.js は unpkg / esm.sh / jsDelivr の複数経路から最初に成功したものを使用
+- Three.js読込を8秒で打ち切り
+- アプリ全体を12秒で監視し、失敗時は永久スピナーではなくエラー画面へ移行
+- `#loading[hidden]` を `display:none !important` として確実に非表示化
+
+更新後も古い画面が残る場合は、ブラウザで強制再読み込みしてください。Safariでは `Option + Command + R`、Chromeでは `Shift + Command + R` が使えます。
 
 ## ゲーム内容
 
