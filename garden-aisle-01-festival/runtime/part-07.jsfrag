@@ -1,0 +1,142 @@
+        box([x+.15,1.15,-14.8],[.55,.12,.11],shade(v.chair,-.12),[0,0,-.35],{roughness:.7});
+      }
+    } else if(v.decor==='mediterranean'){
+      addMusicalStage(v,['guitar','guitar','cajon']);
+      addParasols(v); addStringLights(v,-4,5.25);
+      for(let i=0;i<7;i++){
+        cylinder([-7.0+i*2.3,.45,-14.3],[.38,.75,.38],i%2?v.accent2:v.path,[0,0,0],{roughness:.75});
+        sphere([-7.0+i*2.3,1.02,-14.3],[.34,.32,.34],i%2?'#cf553f':'#e3a33a',{roughness:.8});
+      }
+    } else if(v.decor==='okinawa'){
+      addMusicalStage(v,['sanshin','sanshin','drum','drum']);
+      for(let z=4;z>-15;z-=3.3) addStringLights(v,z,5.35);
+      addParasols(v);
+      for(let i=0;i<8;i++){
+        const x=-6.3+i*1.8; cone([x,5.3,-17.4],[.5,.28,.5],i%3===0?v.accent:i%3===1?v.accent2:'#3d7895',[0,0,0],{roughness:.86,anim:'sway',phase:i,amp:.04});
+      }
+    } else if(v.decor==='harvest'){
+      addMusicalStage(v,['violin','accordion','guitar']);
+      for(let i=0;i<3;i++){
+        box([-6.3+i*4.2,.55,-15.0],[2.2,1.1,1.1],shade(v.chair,-.05),[0,0,0],{roughness:.92});
+        for(let k=0;k<5;k++) sphere([-7+i*4.2+k*.3,1.2,-14.6],[.16,.16,.16],k%2?v.accent2:'#bd4f42',{roughness:.82});
+      }
+      addStringLights(v,-6,5.2);
+    } else if(v.decor==='canopy'){
+      const colors=[v.accent,v.accent2,v.cushion,'#477d9a'];
+      for(let i=0;i<9;i++){
+        const x=-7.5+i*1.85;
+        box([x,5.7,-6],[.18,.035,23],colors[i%colors.length],[0,0,(i-4)*.015],{roughness:.94,anim:'canopy',phase:i,amp:.04});
+      }
+      addMusicalStage(v,['glockenspiel','violin','violin']);
+      for(let i=0;i<6;i++){
+        triangle([-6+i*2.4,6.1,-12+i%2*2],[.6,.75,.6],colors[(i+1)%colors.length],[0,0,i%2?.12:-.12],{roughness:.86,anim:'sway',phase:i,amp:.1});
+      }
+      addPerson(-5.6,-13,v.guests[0],true,'dancer',1001); addPerson(5.6,-13,v.guests[2],true,'dancer',1002);
+    } else if(v.decor==='twilight'){
+      addMusicalStage(v,['sax','cello','drum']);
+      for(let z=4;z>-15;z-=3.2) addStringLights(v,z,5.15);
+      for(let i=0;i<6;i++){
+        const side=i%2?-1:1,x=side*(5.2+(i%3)*.7),z=2-Math.floor(i/2)*5;
+        box([x,.32,z],[2.1,.42,1.25],i%2?v.path:v.roof,[0,0,0],{roughness:.92});
+        sphere([x,.75,z],[.18,.30,.18],v.accent2,{roughness:.25,emissive:.32});
+      }
+    } else if(v.decor==='fountain'){
+      cylinder([0,.45,-14.8],[2.3,.7,2.3],v.path,[0,0,0],{roughness:.35});
+      cylinder([0,1.0,-14.8],[1.65,.22,1.65],v.accent2,[0,0,0],{roughness:.38});
+      cylinder([0,1.65,-14.8],[.28,1.4,.28],v.path2,[0,0,0],{roughness:.32});
+      sphere([0,2.25,-14.8],[.7,.14,.7],'#4f9fb0',{alpha:.35,roughness:.05,anim:'water',phase:0,amp:.05});
+      addMusicalStage(v,['sax','trumpet','drum']);
+      addPerson(-4.8,-14,v.guests[0],true,'dancer',1101); addPerson(4.8,-14,v.guests[2],true,'dancer',1102);
+      addStringLights(v,-7,5.5);
+    } else if(v.decor==='finale'){
+      addMusicalStage(v,['trumpet','trumpet','drum','sax']);
+      for(let z=4;z>-14;z-=3) addStringLights(v,z,5.5);
+      for(let i=0;i<32;i++){
+        const r=rng(1200+i); const c=i%3===0?v.accent:i%3===1?v.accent2:v.cushion;
+        box([-8+r()*16,2+r()*4,-15+r()*23],[.10,.18,.035],c,[r()*2,r()*2,r()*2],{roughness:.85,anim:'confetti',phase:r()*6,speed:.6+r()*.7,amp:1.5+r()*2});
+      }
+      for(let i=0;i<18;i++){
+        const r=rng(1400+i);
+        sphere([-6+r()*12,.6+r()*2,-9+r()*12],[.12+r()*.13,.12+r()*.13,.12+r()*.13],i%2?v.path2:'#4d90a1',{alpha:.28,roughness:.08,anim:'bubble',phase:r()*6,speed:.4+r()*.5,amp:.2});
+      }
+    }
+  }
+
+  function buildScene(v){
+    objects=[];
+    box([0,-.12,-6],[34,.24,42],v.grass,[0,0,0],{roughness:1});
+    box([0,-.03,-6],[4.5,.11,26.5],v.path,[0,0,0],{roughness:.92});
+    addPathPattern(v);
+    addBuilding(v);
+    const treeZ=[4,-1,-6,-11,-16];
+    treeZ.forEach((z,i)=>{addTree(-8,z,300+i,v);addTree(8,z,400+i,v);});
+    decorateTrees(v);
+    const rows=[5,1.5,-2,-5.5,-9,-12.5];
+    rows.forEach((z,row)=>{
+      [-1,1].forEach(side=>{
+        [4.25,5.65].forEach((x,slot)=>addChair(side*x,z,side,v,row,slot));
+      });
+    });
+    const guestRows=[0,1,2,3,4];
+    guestRows.forEach((row)=>{
+      const z=rows[row]-.05;
+      [-1,1].forEach((side)=>{
+        const color=v.guests[(row+(side>0?2:0))%v.guests.length];
+        addPerson(side*4.25,z,color,false,'guest',1500+row+(side>0?30:0));
+      });
+    });
+    for(let i=0;i<9;i++){
+      const z=5-i*2.25;
+      addFlowerCluster(-2.5-(i%2)*.22,z,v.flowers,.78+(i%3)*.08,1800+i,i>7);
+      addFlowerCluster(2.5+(i%2)*.22,z-.25,v.flowers,.72+((i+1)%3)*.09,1900+i,i>7);
+    }
+    addArch(v);
+    decorateVariant(v);
+    opaque=objects.filter(o=>o.alpha>=.999);
+    transparent=objects.filter(o=>o.alpha<.999);
+  }
+
+  function bindMesh(name){
+    if(currentMesh===name)return;
+    const mesh=meshes[name]; currentMesh=name;
+    gl.bindBuffer(gl.ARRAY_BUFFER,mesh.position); gl.vertexAttribPointer(locations.aPosition,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,mesh.normal); gl.vertexAttribPointer(locations.aNormal,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,mesh.index);
+  }
+
+  function animateObject(o,time){
+    o.pos[0]=o.basePos[0];o.pos[1]=o.basePos[1];o.pos[2]=o.basePos[2];
+    o.rot[0]=o.baseRot[0];o.rot[1]=o.baseRot[1];o.rot[2]=o.baseRot[2];
+    const s=Math.sin(time*o.speed+o.phase);
+    if(!state.reduced){
+      if(o.anim==='sway'){o.rot[2]+=s*o.amp;o.rot[0]+=Math.cos(time*.7+o.phase)*o.amp*.3;}
+      if(o.anim==='dance'){o.pos[1]+=Math.abs(s)*.055;o.rot[2]+=s*.06;}
+      if(o.anim==='music'){o.rot[2]+=s*.08;}
+      if(o.anim==='canopy'){o.pos[1]+=s*.045;o.rot[2]+=s*.012;}
+      if(o.anim==='raindrop'){o.pos[1]=1.2+((o.basePos[1]-time*o.speed*.55+o.phase*2)%3.8+3.8)%3.8;}
+      if(o.anim==='water'){o.scale[1]=.13+s*.015;}
+      if(o.anim==='confetti' && state.cheer>0){o.pos[1]=.5+((o.basePos[1]-state.cheer*o.speed*2.4+o.phase*2)%6+6)%6;o.rot[0]+=state.cheer*o.speed;o.rot[2]+=state.cheer*o.speed*.7;}
+      if(o.anim==='bubble' && state.cheer>0){o.pos[1]=.3+((o.basePos[1]+state.cheer*o.speed*1.1+o.phase)%3.4);o.pos[0]+=Math.sin(state.cheer*1.8+o.phase)*.18;}
+    }
+    if(o.tag==='arm' && state.cheer>0){const lift=Math.sin(Math.min(1,state.cheer)*Math.PI*.5);o.rot[2]=o.baseRot[2]-o.cheerSide*lift*1.35+Math.sin(time*7+o.phase)*.06;}
+  }
+
+  const model=new Float32Array(16), normal=new Float32Array(9);
+  function drawList(list,time){
+    for(const o of list){
+      animateObject(o,time);
+      const m=modelMatrix(o.pos,o.rot,o.scale); model.set(m); normalMatrix(normal,model);
+      bindMesh(o.mesh);
+      gl.uniformMatrix4fv(locations.uModel,false,model);
+      gl.uniformMatrix3fv(locations.uNormalMatrix,false,normal);
+      gl.uniform3fv(locations.uColor,o.color);
+      gl.uniform1f(locations.uRoughness,o.roughness);
+      gl.uniform1f(locations.uEmissive,o.emissive);
+      gl.uniform1f(locations.uAlpha,o.alpha);
+      gl.drawElements(gl.TRIANGLES,meshes[o.mesh].count,gl.UNSIGNED_SHORT,0);
+    }
+  }
+
+  function resize(){
+    const dpr=Math.min(devicePixelRatio||1,innerWidth<700?1.25:1.5);
+    width=Math.max(1,Math.floor(innerWidth*dpr));height=Math.max(1,Math.floor(innerHeight*dpr));
