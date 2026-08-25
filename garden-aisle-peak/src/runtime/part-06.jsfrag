@@ -1,0 +1,147 @@
+    });
+  }
+}
+
+/* ===== SCENES.JS ===== */
+const SCENES = [
+  {
+    id: 'garden-cathedral', number: '01', short: '百花', kicker: 'GARDEN CATHEDRAL',
+    title: '百花の庭園大聖堂',
+    description: '低い花の島が奥へ行くほど立ち上がり、最後に大きな花の門へつながります。花の量は多くても、歩く幅と人の顔が見える高さを守ります。',
+    species: ['ガーデンローズ', '芍薬', 'デルフィニウム', 'ジギタリス'],
+    paletteCss: ['#f0dfd7','#d6a4a6','#91a9bb','#526b4d'],
+    accent: '#96594d', accentSoft: '#dcb5a0', tone: 'light',
+    background: 0xaeb795, fog: 0xc9cbb4, fogDensity: .017,
+    sky: 0xded8bd, groundLight: 0x3b4635, sun: 0xffc77e, sunIntensity: 3.6, sunPos: [-8,7,7], exposure: 1.0,
+    grass: '#506244', path: '#aa9b80', chair: { kind: 'crossback', color: 0x71543d, seat: 0xc9b9a5 }, rows: 6,
+    view: { guest: { position:[.35,3.55,15.5], target:[0,1.65,-5.2], fov:38 }, decorator:{ position:[10.8,6.4,12.5], target:[0,1.55,-3.2], fov:42 } },
+    build: buildGardenCathedral
+  },
+  {
+    id: 'ivory-rose-hall', number: '02', short: '白薔薇', kicker: 'IVORY ROSE HALL',
+    title: '白薔薇の回廊',
+    description: '二重の花門と白いランナーを一直線につなぎ、アイボリーの薔薇と紫陽花を厚く重ねます。真鍮の灯りは花ではなく足元を照らします。',
+    species: ['白薔薇', '白紫陽花', 'トルコキキョウ', 'ジャスミン'],
+    paletteCss: ['#f5f0e7','#dfd9cc','#c8b590','#53644f'],
+    accent: '#7b6b55', accentSoft: '#d6c7ad', tone: 'light',
+    background: 0xd2cec1, fog: 0xe2ded2, fogDensity: .018,
+    sky: 0xf0efe8, groundLight: 0x514b43, sun: 0xfff1d9, sunIntensity: 3.2, sunPos: [4,10,6], exposure: 1.08,
+    grass: '#68705d', path: '#b9b0a0', chair: { kind:'chiavari', color:0xb49a69, seat:0xe4ded3 }, rows:6,
+    view: { guest:{position:[.2,3.35,15.9],target:[0,1.7,-5.3],fov:37},decorator:{position:[9.8,6.1,11.8],target:[0,1.6,-4],fov:41} },
+    build: buildIvoryRoseHall
+  },
+  {
+    id: 'hydrangea-river', number: '03', short: '紫陽花', kicker: 'HYDRANGEA RIVER',
+    title: '紫陽花の川',
+    description: '青から白へ変わる紫陽花の帯が、石の小道をS字に縁取ります。浅いガラス器の水面と、雨上がりの冷たい光が花房の厚みを見せます。',
+    species: ['青紫陽花', 'デルフィニウム', 'スカビオサ', 'シダ'],
+    paletteCss: ['#dce8ec','#9fbac7','#728fa8','#416251'],
+    accent: '#557c88', accentSoft: '#b7d0d2', tone: 'light',
+    background: 0xaebfc0, fog: 0xcbd7d6, fogDensity: .02,
+    sky: 0xe0eceb, groundLight: 0x3b4c48, sun: 0xe8f2ef, sunIntensity: 2.6, sunPos: [-3,11,4], exposure: 1.03,
+    grass:'#50675b', path:'#87908b', chair:{kind:'bentwood',color:0xe1ddd2,seat:0xc8d0cd},rows:5, wet:true,
+    view:{guest:{position:[.6,3.2,15.6],target:[0,1.35,-5.1],fov:38},decorator:{position:[10.6,6.8,11.2],target:[0,1.15,-3.8],fov:43}},
+    build: buildHydrangeaRiver
+  },
+  {
+    id: 'wisteria-cloud', number: '04', short: '藤棚', kicker: 'WISTERIA CANOPY',
+    title: '藤棚の花雲',
+    description: '木のパーゴラから藤と蘭が重力どおりに垂れ、歩くと花房の層が前後にほどけます。吊りワイヤーと梁が荷重を受け、花は空中に浮きません。',
+    species: ['藤', '胡蝶蘭', 'スイートピー', 'クレマチス'],
+    paletteCss: ['#d9cfeb','#ad99c7','#f2e8e9','#4a6652'],
+    accent:'#735e8d',accentSoft:'#c8b9d7',tone:'light',
+    background:0xbcc7bd,fog:0xd7ddd4,fogDensity:.016,
+    sky:0xe6ece5,groundLight:0x3e473c,sun:0xffffff,sunIntensity:2.7,sunPos:[-4,12,3],exposure:1.04,
+    grass:'#54654e',path:'#a49b89',chair:{kind:'bench',color:0x73543b},rows:5,
+    view:{guest:{position:[.15,3.3,15.2],target:[0,2.6,-4.8],fov:39},decorator:{position:[10.6,7.4,10.7],target:[0,2.6,-3.6],fov:44}},
+    build:buildWisteriaCloud
+  },
+  {
+    id:'candle-dusk',number:'05',short:'薄暮',kicker:'CANDLE GARDEN / 18:42',
+    title:'薄暮のキャンドル庭園',
+    description:'白い花の間に保護ガラス入りの蝋燭を置き、夕空が暗くなるほど通路の輪郭が現れます。布・葉・炎の距離と消火器の位置まで設営済みです。',
+    species:['白アネモネ','ラナンキュラス','ヘレボルス','ユーカリ'],
+    paletteCss:['#f0e9df','#c9b8ad','#6f6a70','#344c40'],
+    accent:'#a27b55',accentSoft:'#d3b48d',tone:'dark',
+    background:0x34404a,fog:0x515b60,fogDensity:.022,
+    sky:0x71808c,groundLight:0x282823,sun:0xffb36f,sunIntensity:1.75,sunPos:[-7,5,4],exposure:.86,
+    grass:'#35483d',path:'#595b57',chair:{kind:'black',color:0x252726,seat:0x3e3d3a},rows:5,
+    view:{guest:{position:[.25,3.15,15.4],target:[0,1.3,-5],fov:38},decorator:{position:[9.7,5.8,11.4],target:[0,1.25,-3.5],fov:42}},
+    build:buildCandleDusk
+  },
+  {
+    id:'okinawa-feast',number:'06',short:'南島',kicker:'OKINAWA WIND-SAFE GARDEN',
+    title:'南の島の祝宴',
+    description:'大きな葉を骨格に、アンスリウムとジンジャーを風下へ流します。石の器と低い重心で沖縄の風に耐え、竹の椅子と琉球石灰岩が会場を支えます。',
+    species:['アンスリウム','ヘリコニア','レッドジンジャー','モンステラ'],
+    paletteCss:['#e75862','#f29a69','#f1e4d0','#235c45'],
+    accent:'#a9464d',accentSoft:'#e39a92',tone:'light',
+    background:0x79a9a8,fog:0xb4cdc2,fogDensity:.014,
+    sky:0x91c7ce,groundLight:0x4b4d36,sun:0xffe5ae,sunIntensity:4.2,sunPos:[-3,12,4],exposure:1.02,
+    grass:'#4b7056',path:'#b2a17f',chair:{kind:'bamboo',color:0x9a7548,seat:0xd5c3a4},rows:5,
+    view:{guest:{position:[.55,3.5,15.7],target:[0,1.7,-5],fov:38},decorator:{position:[10.8,6.3,11.8],target:[0,1.4,-3.7],fov:43}},
+    build:buildOkinawaFeast
+  },
+  {
+    id:'spring-orchard',number:'07',short:'果樹園',kicker:'SPRING ORCHARD',
+    title:'春の果樹園',
+    description:'花枝が頭上でゆるく交差し、足元にはチューリップとラナンキュラスが群生します。籐籠と木箱は、搬入した花をそのまま会場の器へ転用しています。',
+    species:['林檎の花','チューリップ','ラナンキュラス','スイートピー'],
+    paletteCss:['#f3d9dc','#f5eddf','#e7b56a','#668064'],
+    accent:'#a56868',accentSoft:'#deb7b5',tone:'light',
+    background:0xb8c2a6,fog:0xd4d8c6,fogDensity:.016,
+    sky:0xe5e2ce,groundLight:0x46513c,sun:0xffd7a5,sunIntensity:3.3,sunPos:[-8,8,6],exposure:1.04,
+    grass:'#58704f',path:'#ad9f84',chair:{kind:'bentwood',color:0xf0ece2,seat:0xdccfbe},rows:5,
+    view:{guest:{position:[.1,3.45,15.5],target:[0,2.05,-5],fov:38},decorator:{position:[10.3,7.0,11.1],target:[0,1.8,-3.5],fov:43}},
+    build:buildSpringOrchard
+  },
+  {
+    id:'autumn-harvest',number:'08',short:'秋実',kicker:'AUTUMN HARVEST AISLE',
+    title:'秋の実りの道',
+    description:'ダリア、アマランサス、穂草を銅の器から溢れさせ、琥珀色の光で質感を拾います。花の島は不規則でも、銅器の重さと接地で安定しています。',
+    species:['ダリア','アマランサス','ジニア','穂草'],
+    paletteCss:['#aa4e45','#d18449','#6f3440','#6c6b45'],
+    accent:'#95523d',accentSoft:'#cf9c72',tone:'light',
+    background:0xa99070,fog:0xc6b596,fogDensity:.018,
+    sky:0xdcc6a0,groundLight:0x40392d,sun:0xffb45f,sunIntensity:3.65,sunPos:[-9,5.5,7],exposure:.98,
+    grass:'#5c6040',path:'#9d8568',chair:{kind:'bench',color:0x65452f},rows:5,
+    view:{guest:{position:[.4,3.35,15.7],target:[0,1.55,-5],fov:38},decorator:{position:[10.4,6.1,11.7],target:[0,1.3,-3.8],fov:42}},
+    build:buildAutumnHarvest
+  },
+  {
+    id:'winter-moon',number:'09',short:'冬月',kicker:'WINTER MOON GARDEN',
+    title:'冬月の白庭',
+    description:'白薔薇とヘレボルスを白樺の枝に沿わせ、冷たい月光と安全な小型灯で輪郭を分けます。断熱した水源が花を凍結乾燥から守ります。',
+    species:['白薔薇','ヘレボルス','水仙','シルバーリーフ'],
+    paletteCss:['#f2f1ea','#d8dedc','#aebcc0','#59665f'],
+    accent:'#6e8490',accentSoft:'#c6d1d2',tone:'dark',
+    background:0x223143,fog:0x394957,fogDensity:.02,
+    sky:0x7187a1,groundLight:0x252b2c,sun:0xb9c9e7,sunIntensity:1.8,sunPos:[-6,11,-2],exposure:.78,
+    grass:'#44514c',path:'#9da09d',chair:{kind:'crossback',color:0x777a76,seat:0xc9c9c2},rows:5,
+    view:{guest:{position:[.25,3.35,15.7],target:[0,1.65,-5],fov:38},decorator:{position:[10.0,6.3,11.2],target:[0,1.5,-3.5],fov:42}},
+    build:buildWinterMoon
+  },
+  {
+    id:'ikebana-theatre',number:'10',short:'蘭枝',kicker:'IKEBANA PROCESSION',
+    title:'蘭と枝の静かな劇場',
+    description:'花を大量に並べず、蘭、カラー、枝、水面の余白で一歩ごとの場面を作ります。黒染め鋼の台座と剣山が、非対称な花の荷重を受けます。',
+    species:['シンビジウム蘭','カラー', '花枝', '苔'],
+    paletteCss:['#e8dfd1','#b7be89','#754d39','#222725'],
+    accent:'#6c6250',accentSoft:'#bbb197',tone:'dark',
+    background:0x2b302f,fog:0x434947,fogDensity:.019,
+    sky:0x75807d,groundLight:0x1e211f,sun:0xffd3a0,sunIntensity:2.65,sunPos:[-5,8,6],exposure:.83,
+    grass:'#36443b',path:'#474b47',chair:{kind:'stool',color:0x3a2c24,seat:0x49443d},rows:4,
+    view:{guest:{position:[.3,3.25,15.2],target:[0,1.55,-5],fov:37},decorator:{position:[9.6,6.7,10.9],target:[0,1.35,-3.6],fov:42}},
+    build:buildIkebanaTheatre
+  }
+];
+
+function buildGround(parent, config, registry) {
+  const lawnMap=makeLawnTexture(registry,41+Number(config.number),[10,10],config.grass);
+  const lawn=material(0xffffff,.96,0,{map:lawnMap});
+  addPlane(parent,34,34,[0,0,-4],lawn);
+  const pathMap=makeStoneTexture(registry,71+Number(config.number),[2.2,8],config.path);
+  const path=material(0xffffff,config.wet?.28:.93,0,{map:pathMap});
+  addPlane(parent,3.45,25,[0,.012,-3.9],path);
+  if(config.wet) {
+    const puddle=material(0x779394,.08,.04,{transparent:true,opacity:.24,depthWrite:false});
