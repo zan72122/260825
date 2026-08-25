@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17110d">
+  <meta name="description" content="4歳児向け輪島塗3Dモバイルゲームのトップページ比較実装。15のWebGLコンセプトを収録。">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <title>輪島塗を、つくろう。— 15の入口</title>
+</head>
+<body data-variant="01" data-layout="left" data-orientation="landscape">
+  <canvas id="stage" aria-label="輪島塗の工房を描いた3Dシーン"></canvas>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <main class="app-shell">
+    <header class="masthead">
+      <button id="brandButton" class="brand" type="button" aria-label="最初の案へ戻る">
+        <span class="seal" aria-hidden="true">輪</span>
+        <span>
+          <strong>輪島塗を、つくろう。</strong>
+          <small>WAJIMA / TOUCH CRAFT</small>
+        </span>
+      </button>
+      <button id="galleryButton" class="gallery-button" type="button" aria-haspopup="dialog" aria-controls="variantTray">
+        <strong id="variantCounter">01 / 15</strong>
+        <span>案をくらべる</span>
+      </button>
+    </header>
+
+    <section class="hero" aria-live="polite">
+      <p id="kicker" class="kicker">写実案 01</p>
+      <h1 id="title">朝の塗師蔵</h1>
+      <p id="kana" class="kana">あさの ぬしぐら</p>
+      <p id="subtitle" class="subtitle">朝の斜光が、黒漆のわずかな刷毛目だけを拾う。</p>
+      <p id="process" class="process">木地から、百二十四の手へ。</p>
+    </section>
+
+    <section class="actions" aria-label="ゲーム開始">
+      <button id="startButton" class="start-button" type="button">
+        <span class="play" aria-hidden="true">▶</span>
+        <span>
+          <strong>つくりはじめる</strong>
+          <small>さわって、工程をのぞく</small>
+        </span>
+      </button>
+      <p class="gesture"><span aria-hidden="true"></span>画面をゆっくりなぞると、工房を見回せます</p>
+    </section>
+
+    <aside class="scene-caption" aria-label="現在の表現方式">
+      <span id="captionIndex">SCENE 01</span>
+      <i aria-hidden="true"></i>
+      <span id="styleLabel">暖色写実・深い奥行き</span>
+    </aside>
+
+    <nav class="step-nav" aria-label="トップページ案の切り替え">
+      <button id="prevButton" type="button" aria-label="前の案">‹</button>
+      <button id="nextButton" type="button" aria-label="次の案">›</button>
+    </nav>
+
+    <section id="previewPanel" class="preview" aria-live="polite" aria-hidden="true">
+      <div><strong id="previewLabel">木地を挽く</strong><span id="previewPercent">0%</span></div>
+      <div class="preview-track"><i id="previewBar"></i></div>
+      <p id="previewHint">木の形が生まれる</p>
+    </section>
+
+    <p id="orientationLabel" class="orientation">LANDSCAPE / TOUCH READY</p>
+  </main>
+
+  <section id="variantTray" class="variant-tray" role="dialog" aria-modal="true" aria-labelledby="trayTitle" hidden>
+    <button class="tray-backdrop" type="button" data-close-tray aria-label="一覧を閉じる"></button>
+    <div class="tray-panel">
+      <header>
+        <div>
+          <p>TOP PAGE STUDY</p>
+          <h2 id="trayTitle">15の入口を、見比べる</h2>
+        </div>
+        <button id="closeTrayButton" class="close" type="button" aria-label="閉じる">×</button>
+      </header>
+      <p class="tray-intro">色替えではなく、光源、カメラ、材質、空間、写実度を案ごとに変えています。</p>
+      <div id="variantGrid" class="variant-grid"></div>
+      <footer><span>← → キーでも切替</span><span>全案 WebGL 実ジオメトリ</span></footer>
+    </div>
+  </section>
+
+  <section id="errorPanel" class="error-panel" role="alert" hidden>
+    <strong>3D表示を開始できませんでした</strong>
+    <p id="errorMessage">WebGL 2を有効にして、再読み込みしてください。</p>
+  </section>
+
+  <div id="renderStatus" class="render-status" aria-hidden="true">initializing</div>
+  <script src="src/core.js"></script>
+  <script src="src/renderer.js"></script>
+  <script src="src/scene-kit.js"></script>
+  <script src="src/variants.js"></script>
+  <script src="src/scenes-a.js"></script>
+  <script src="src/scenes-b.js"></script>
+  <script src="src/ui.js"></script>
+</body>
+</html>
