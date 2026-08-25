@@ -1,0 +1,120 @@
+      box([0,.055,-6],[4,.06,25.5],v.path,[0,0,0],{roughness:.92});
+      for(let row=0;row<10;row++){
+        box([0,.09,5-row*2.25],[3.1,.035,.22],row%2?v.path2:v.ribbon,[0,0,0],{roughness:.88});
+      }
+    }
+  }
+
+  function addStringLights(v, z, y=5.4){
+    box([0,y,z],[15.5,.035,.035],shade(v.accent2,-.3),[0,0,0],{roughness:.7});
+    for(let i=-7;i<=7;i++){
+      sphere([i*1.05,y-.12-Math.abs(i)*.01,z],[.09,.12,.09],i%3===0?v.accent:i%3===1?v.accent2:v.cushion,{roughness:.25,emissive:.22,anim:'sway',phase:i*.7,amp:.012});
+    }
+  }
+
+  function addParasols(v){
+    const colors=[v.accent,v.accent2,v.cushion,'#4e7f9e'];
+    [[-7,1], [7,-1],[-7,-8],[7,-11]].forEach((p,i)=>{
+      cylinder([p[0],1.2,p[1]],[.055,2.4,.055],shade(v.chair,-.1));
+      cone([p[0],2.52,p[1]],[1.1,.38,1.1],colors[i%colors.length],[0,0,0],{roughness:.88,anim:'sway',phase:i,amp:.018});
+      sphere([p[0],2.68,p[1]],[.09,.09,.09],v.accent2,{roughness:.45});
+    });
+  }
+
+  function addMusician(x,z,color,instrument,seed){
+    addPerson(x,z,color,true,'musician',seed);
+    if(instrument==='harp'){
+      add('torus',[x+.34,1.25,z-.15],[.58,.84,.16],vColor('#c4933f'),[Math.PI/2,0,0],{roughness:.34});
+      cylinder([x+.08,1.27,z-.15],[.045,1.6,.045],'#8b5e37',[0,0,-.25],{roughness:.48});
+      for(let i=0;i<5;i++) cylinder([x+.18+i*.1,1.28,z-.15],[.014,.95-i*.1,.014],'#d4a84d',[0,0,0],{roughness:.25});
+    } else if(instrument==='violin' || instrument==='cello'){
+      const yy=instrument==='cello'?1.0:1.38;
+      sphere([x+.3,yy,z-.18],[.22,.32,.09],'#9d5833',{roughness:.46});
+      sphere([x+.3,yy+.25,z-.18],[.18,.24,.08],'#b66b38',{roughness:.46});
+      box([x+.3,yy+.56,z-.18],[.08,.7,.08],'#5f3829',[0,0,.18],{roughness:.52});
+    } else if(instrument==='guitar' || instrument==='sanshin'){
+      const body=instrument==='sanshin'?'#7e5b3d':'#b66b37';
+      sphere([x+.28,1.25,z-.2],[instrument==='sanshin'?.19:.28,instrument==='sanshin'?.24:.34,.10],body,{roughness:.5});
+      box([x+.42,1.55,z-.2],[.09,.82,.09],'#59402e',[0,0,-.45],{roughness:.52});
+    } else if(instrument==='trumpet' || instrument==='sax'){
+      cylinder([x+.32,1.38,z-.18],[.055,.65,.055],'#c99a3e',[Math.PI/2,0,-.72],{roughness:.25,anim:'music',phase:seed});
+      cone([x+.57,1.37,z-.18],[.16,.28,.16],'#d6a743',[Math.PI/2,0,-.72],{roughness:.22});
+    } else if(instrument==='drum' || instrument==='cajon'){
+      if(instrument==='drum') cylinder([x+.34,1.05,z-.2],[.35,.55,.35],currentVariant.accent2,[Math.PI/2,0,0],{roughness:.55,anim:'music',phase:seed});
+      else box([x+.28,.72,z-.18],[.55,.82,.42],'#a9693f',[0,0,0],{roughness:.72});
+    } else if(instrument==='accordion'){
+      box([x+.3,1.35,z-.16],[.7,.45,.28],currentVariant.accent,[0,0,0],{roughness:.65,anim:'music',phase:seed});
+      for(let i=-2;i<=2;i++) box([x+.3+i*.08,1.35,z-.305],[.025,.32,.02],currentVariant.accent2,[0,0,0],{roughness:.55});
+    } else if(instrument==='glockenspiel'){
+      box([x+.3,1.0,z-.2],[.85,.09,.55],'#735443',[0,0,0],{roughness:.67});
+      for(let i=0;i<7;i++) box([x-.02+i*.1,1.09,z-.2],[.07,.035,.42],i%2?currentVariant.accent2:currentVariant.cushion,[0,0,0],{roughness:.28});
+    }
+  }
+  function vColor(hex){return hexColor(hex);}
+
+  function addMusicalStage(v, instruments){
+    box([0,.18,-18.2],[7.5,.36,3.0],shade(v.building,-.08),[0,0,0],{roughness:.75});
+    box([0,3.2,-19.1],[8.1,.16,2.4],v.roof,[0,0,0],{roughness:.65});
+    for(const x of [-3.7,3.7]) box([x,1.7,-19.0],[.18,3.4,.18],v.accent2,[0,0,0],{roughness:.43});
+    const positions=instruments.length===5?[-2.4,-1.2,0,1.2,2.4]:instruments.length===4?[-1.8,-.6,.6,1.8]:[-1.25,0,1.25];
+    instruments.forEach((instrument,i)=>addMusician(positions[i],-17.9,v.guests[(i+2)%v.guests.length],instrument,700+i));
+  }
+
+  function decorateTrees(v){
+    const zs=[4,-1,-6,-11,-16];
+    if(v.decor==='ribbon' || v.decor==='canopy' || v.decor==='finale'){
+      zs.forEach((z,zi)=>[-1,1].forEach((side)=>{
+        for(let k=0;k<3;k++){
+          box([side*7.75+(k-1)*.16,2.5+k*.35,z],[.08,2.3,.05],[vColor(k%2?v.ribbon:v.accent),][0],[0,0,(side<0?-.06:.06)],{roughness:.9,anim:'sway',phase:zi+k,amp:.06});
+        }
+      }));
+    }
+    if(['orchestra','okinawa','twilight','fountain','rain'].includes(v.decor)){
+      zs.forEach((z,zi)=>[-1,1].forEach(side=>{
+        const color=zi%3===0?v.accent:zi%3===1?v.accent2:v.cushion;
+        cylinder([side*7.65,2.65,z],[.04,1.15,.04],shade(v.chair,-.16),[0,0,0],{roughness:.65});
+        sphere([side*7.65,2.02,z],[.22,.30,.22],color,{roughness:.28,emissive:v.decor==='twilight'?.30:.10,anim:'sway',phase:zi+side,amp:.025});
+      }));
+    }
+    if(v.decor==='mediterranean' || v.decor==='harvest'){
+      zs.forEach((z,zi)=>[-1,1].forEach(side=>{
+        for(let k=0;k<4;k++){
+          const a=k/4*Math.PI*2+zi*.4;
+          sphere([side*7.7+Math.cos(a)*.65,3.45+Math.sin(a)*.35,z+Math.sin(a)*.55],[.13,.13,.13],k%2?v.accent2:'#cf5e3e',{roughness:.75});
+        }
+      }));
+    }
+  }
+
+  function decorateVariant(v){
+    if(v.decor==='orchestra'){
+      addStringLights(v,-3,5.6); addStringLights(v,-10,5.3);
+      addMusicalStage(v,['violin','violin','cello','harp']);
+      for(let i=0;i<5;i++) box([-7.2+i*.55,.35,-14.8],[.42,.7,.7],i%2?v.accent:v.accent2,[0,i*.08,0],{roughness:.76});
+      addParasols(v);
+    } else if(v.decor==='ribbon'){
+      addParasols(v);
+      addMusicalStage(v,['trumpet','trumpet','drum','sax']);
+      for(let z=4;z>-15;z-=3.2) addStringLights(v,z,5.8);
+      for(let i=0;i<10;i++) triangle([-6.5+i*1.45,4.8,-5.5],[.35,.52,.35],i%2?v.accent:v.accent2,[0,0,0],{roughness:.85,anim:'sway',phase:i,amp:.07});
+    } else if(v.decor==='theatre'){
+      box([0,4.2,-18.9],[8.0,5.2,.18],v.path,[0,0,0],{roughness:.96});
+      for(const x of [-3.5,3.5]) box([x,3.4,-18.65],[1.1,5.4,.25],v.cushion,[0,0,x<0?.12:-.12],{roughness:.96});
+      addMusicalStage(v,['cello','violin','harp']);
+      addStringLights(v,-6,5.5);
+      for(let z=2;z>-13;z-=3.6) [-1,1].forEach(side=>sphere([side*6.9,1.6,z],[.32,.45,.22],side>0?v.accent:v.accent2,{roughness:.25,emissive:.12}));
+    } else if(v.decor==='rain'){
+      box([0,4.7,-18.5],[8.8,.18,4.1],v.roof,[0,0,0],{roughness:.44});
+      for(const x of [-4.2,4.2]) box([x,2.4,-18.5],[.16,4.8,.16],v.accent2,[0,0,0],{roughness:.4});
+      addMusicalStage(v,['sax','cello','drum']);
+      addParasols(v); addStringLights(v,-4,5.2); addStringLights(v,-10,5.0);
+      for(let i=0;i<18;i++) sphere([-7.5+(i%6)*3,3.8+(i%3)*.4,2-Math.floor(i/6)*6],[.035,.055,.035],v.path2,{alpha:.45,roughness:.08,anim:'raindrop',phase:i,amp:.3});
+    } else if(v.decor==='carousel'){
+      cylinder([0,2.7,-18.2],[3.8,.28,3.8],v.roof,[0,0,0],{roughness:.8});
+      cone([0,4.1,-18.2],[4.4,2.0,4.4],v.cushion,[0,0,0],{roughness:.88});
+      for(let i=0;i<8;i++){
+        const a=i/8*Math.PI*2; cylinder([Math.cos(a)*2.8,2.0,-18.2+Math.sin(a)*2.0],[.055,3.4,.055],v.accent2);
+      }
+      addMusicalStage(v,['glockenspiel','violin','trumpet']);
+      for(let i=0;i<5;i++){
+        const x=-2.8+i*1.4; sphere([x,.85,-14.8],[.42,.28,.18],i%2?v.accent:v.accent2,{roughness:.8});
