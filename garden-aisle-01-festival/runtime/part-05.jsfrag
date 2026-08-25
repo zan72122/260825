@@ -1,0 +1,127 @@
+      box([x,1.11,backZ+.02],[.28,.055,.035],v.chair,[0,yaw,0],{roughness:.38});
+    } else if(v.decor==='okinawa'){
+      for(let k=-1;k<=1;k++) box([x+k*.22,1.09,backZ],[.17,.24,.035],k===0?v.path2:k<0?v.accent:'#3d7895',[0,yaw,k*.16],{roughness:.9});
+    } else if(v.decor==='harvest'){
+      box([x,1.03,backZ],[.72,.07,.035],v.ribbon,[0,yaw,.52],{roughness:.92});
+      box([x,1.03,backZ],[.72,.07,.035],v.cushion,[0,yaw,-.52],{roughness:.92});
+    } else if(v.decor==='canopy'){
+      triangle([x-.18,1.1,backZ],[.18,.25,.12],v.accent,[0,0,.12],{roughness:.88});
+      triangle([x+.18,1.1,backZ],[.18,.25,.12],v.accent2,[0,0,-.12],{roughness:.88});
+    } else if(v.decor==='twilight'){
+      cylinder([x+side*.48,.95,z],[.035,.6,.035],shade(v.chair,-.1));
+      sphere([x+side*.48,1.28,z],[.12,.18,.12],v.accent2,{roughness:.22,emissive:.28});
+    } else if(v.decor==='fountain'){
+      sphere([x-.34,1.3,backZ],[.075,.075,.055],v.accent2,{roughness:.22});
+      sphere([x+.34,1.3,backZ],[.075,.075,.055],v.accent2,{roughness:.22});
+    } else if(v.decor==='finale'){
+      cylinder([x+side*.43,1.18,z],[.025,.7,.025],shade(v.chair,-.12));
+      triangle([x+side*.53,1.42,z],[.19,.25,.12],slot%2?v.accent2:v.cushion,[0,side>0?Math.PI/2:-Math.PI/2,0],{roughness:.88,anim:'sway',phase:seed,amp:.06});
+    }
+  }
+
+  function addPerson(x,z,color,standing=false,kind='guest',seed=1){
+    const r=rng(seed); const y=standing?1.08:.88;
+    addShadow(x,z,.38,.3,.1);
+    const body = cylinder([x,y,z],[.27,standing?1.0:.72,.27],color,[0,0,0],{roughness:.93,anim:kind==='dancer'?'dance':'',phase:r()*6,amp:.08});
+    sphere([x,y+(standing?.66:.52),z],[.22,.23,.21],r()>.5?'#a86948':'#7f4f37',{roughness:.92,anim:kind==='dancer'?'dance':'',phase:r()*6});
+    const armY=y+.18;
+    cylinder([x-.27,armY,z],[.07,.52,.07],color,[0,0,.45],{roughness:.93,tag:'arm',cheerSide:-1,phase:r()*6});
+    cylinder([x+.27,armY,z],[.07,.52,.07],color,[0,0,-.45],{roughness:.93,tag:'arm',cheerSide:1,phase:r()*6});
+    if(r()>.62){
+      cone([x,y+(standing?.91:.78),z],[.33,.18,.33],shade(color,.08),[0,0,0],{roughness:.86});
+    }
+    return body;
+  }
+
+  function addFlowerCluster(x,z,palette,scale=1,seed=1,high=false,baseY=0){
+    const r=rng(seed); const leafA=currentVariant.leaves[0],leafB=currentVariant.leaves[1];
+    if(baseY===0) addShadow(x,z,.72*scale,.56*scale,.08);
+    for(let i=0;i<3;i++){
+      const a=r()*Math.PI*2,rad=r()*.34*scale, y=baseY+.25*scale+r()*.18*scale;
+      sphere([x+Math.cos(a)*rad,y,z+Math.sin(a)*rad],[.30*scale,.22*scale,.30*scale],i%2?leafA:leafB,{roughness:1,anim:'sway',phase:r()*6,amp:.018});
+    }
+    const count=high?6:5;
+    for(let i=0;i<count;i++){
+      const a=r()*Math.PI*2,rad=r()*.42*scale, y=baseY+(.42+r()*(high?.75:.36))*scale;
+      const c=palette[i%palette.length];
+      cylinder([x+Math.cos(a)*rad*.68,baseY+(y-baseY)*.55,z+Math.sin(a)*rad*.68],[.025,(y-baseY)*.78,.025],leafA,[0,0,0],{roughness:1});
+      sphere([x+Math.cos(a)*rad,y,z+Math.sin(a)*rad],[.18*scale*(.8+r()*.45),.13*scale*(.8+r()*.4),.18*scale*(.8+r()*.45)],c,{roughness:.92,anim:'sway',phase:r()*6,amp:.022});
+      sphere([x+Math.cos(a)*rad,y+.015,z+Math.sin(a)*rad],[.055*scale,.04*scale,.055*scale],shade(c,-.22),{roughness:1});
+    }
+  }
+
+  function addTree(x,z,seed,v){
+    const r=rng(seed);
+    addShadow(x,z,1.35,1.05,.13);
+    cylinder([x,1.65,z],[.34,3.3,.34],'#624631',[0,0,0],{roughness:1});
+    const greens=[v.leaves[0],v.leaves[1],shade(v.leaves[0],.08)];
+    for(let i=0;i<5;i++){
+      const a=i/5*Math.PI*2+r()*.35,rad=.42+r()*.38;
+      sphere([x+Math.cos(a)*rad,3.25+r()*.42,z+Math.sin(a)*rad],[.98+r()*.24,.76+r()*.18,.94+r()*.22],greens[i%3],{roughness:1,anim:'sway',phase:r()*6,amp:.008});
+    }
+  }
+
+  function addBuilding(v){
+    const z=-21;
+    addShadow(0,z+1,9,2.5,.14);
+    box([0,2.8,z],[16,5.6,3.2],v.building,[0,0,0],{roughness:.9});
+    box([0,6.05,z],[17,1.05,3.8],v.roof,[0,0,0],{roughness:.86});
+    for(let i=-3;i<=3;i++){
+      box([i*2.05,3.25,z+1.65],[1.05,2.0,.16],shade(v.building,.12),[0,0,0],{roughness:.74});
+      box([i*2.05,3.25,z+1.76],[.67,1.55,.06],i%2?v.accent:v.accent2,[0,0,0],{roughness:.38,emissive:v.decor==='twilight'?.24:0});
+    }
+    box([0,1.5,z+1.72],[2.6,3.0,.18],shade(v.building,-.12),[0,0,0],{roughness:.72});
+    box([0,4.95,z+1.75],[7.2,.7,.18],v.accent2,[0,0,0],{roughness:.75});
+    for(let i=0;i<9;i++) triangle([-3.2+i*.8,4.55,z+1.87],[.3,.46,.3],i%3===0?v.accent:i%3===1?v.accent2:v.cushion,[0,0,0],{roughness:.83,anim:'sway',phase:i*.7,amp:.05});
+  }
+
+  function addArch(v){
+    addShadow(0,-16.2,3.4,.8,.13);
+    add('torus',[0,3.7,-16.2],[2.9,2.9,.65],v.accent2,[Math.PI/2,0,0],{roughness:.42});
+    box([-2.9,1.1,-16.2],[.32,2.2,.32],v.accent2,[0,0,0],{roughness:.45});
+    box([2.9,1.1,-16.2],[.32,2.2,.32],v.accent2,[0,0,0],{roughness:.45});
+    box([-2.9,.18,-16.2],[1.1,.28,1.0],shade(v.accent2,-.18),[0,0,0],{roughness:.8});
+    box([2.9,.18,-16.2],[1.1,.28,1.0],shade(v.accent2,-.18),[0,0,0],{roughness:.8});
+    for(let i=0;i<9;i++){
+      const a=Math.PI*.15+i/8*Math.PI*.7;
+      const x=Math.cos(a)*2.9,y=3.7+Math.sin(a)*2.9;
+      addFlowerCluster(x,-16.12,v.flowers,.52,500+i,true,y-.4);
+    }
+  }
+
+  function addPathPattern(v){
+    const zStart=6.0;
+    if(['orchestra','mediterranean','fountain'].includes(v.decor)){
+      for(let row=0;row<14;row++) for(let col=-2;col<=2;col++){
+        const color=(row+col)%3===0?v.path2:(row+col)%3===1?shade(v.path,.07):v.path;
+        box([col*.78,.04,zStart-row*1.7],[.7,.045,1.52],color,[0,0,0],{roughness:.9});
+      }
+    } else if(v.decor==='ribbon' || v.decor==='finale'){
+      for(let row=0;row<26;row++){
+        box([0,.045,6-row*.9],[4.05,.05,.78],row%3===0?v.path2:row%3===1?v.path:v.cushion,[0,0,0],{roughness:.88});
+      }
+    } else if(v.decor==='rain'){
+      for(let row=0;row<15;row++) for(let col=-2;col<=2;col++){
+        box([col*.8,.04,6-row*1.65],[.72,.04,1.45],(row+col)%2?v.path:shade(v.path,.08),[0,0,0],{roughness:.24});
+        if((row+col)%4===0) sphere([col*.8,.075,6-row*1.65],[.28,.015,.45],v.path2,{alpha:.18,roughness:.05});
+      }
+    } else if(v.decor==='theatre' || v.decor==='twilight'){
+      box([0,.055,-6],[3.9,.06,25.5],v.path,[0,0,0],{roughness:.92});
+      for(let row=0;row<11;row++){
+        box([0,.09,5-row*2.25],[3.45,.035,1.18],row%2?v.accent2:v.cushion,[0,0,0],{roughness:.86});
+      }
+    } else if(v.decor==='okinawa'){
+      box([0,.055,-6],[4.0,.06,25.5],v.path,[0,0,0],{roughness:.9});
+      for(let row=0;row<12;row++){
+        for(let col=-2;col<=2;col++){
+          const c=(row+col)%4===0?v.path2:(row+col)%4===1?'#3d7391':(row+col)%4===2?v.cushion:v.path;
+          box([col*.74,.09,5-row*2.0],[.56,.035,.56],c,[0,(row+col)*.32,0],{roughness:.86});
+        }
+      }
+    } else if(v.decor==='canopy'){
+      box([0,.055,-6],[4,.06,25.5],v.path,[0,0,0],{roughness:.9});
+      for(let row=0;row<10;row++) for(let ring=0;ring<7;ring++){
+        const a=ring/7*Math.PI*2;
+        sphere([Math.cos(a)*(.45+row%3*.28),.105,5-row*2.2+Math.sin(a)*(.45+row%3*.28)],[.14,.025,.14],ring%2?v.path2:v.cushion,{roughness:.85});
+      }
+    } else {
