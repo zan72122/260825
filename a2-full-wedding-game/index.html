@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#c65a4a">
+  <title>A2 コーラル・リボン・パレード — 全工程ゲーム</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-label="ウェディング会場装花の3D作業画面"></canvas>
+    <header>
+      <div class="brand"><b>A2</b><span>コーラル・リボン・パレード</span></div>
+      <div class="chapter"><small id="chapterNo">01 / 19</small><strong id="chapterTitle">相談・色決め</strong></div>
+      <button id="reset" type="button">最初から</button>
+    </header>
+
+    <aside id="instruction" aria-live="polite">
+      <p id="chapterKicker">FLOWER STUDIO</p>
+      <h1 id="instructionTitle">色見本をボードへ運ぼう</h1>
+      <p id="instructionBody">指でゆっくり動かすと、手が実際に対象へ近づきます。</p>
+      <div class="progress"><i id="progressBar"></i></div>
+    </aside>
+
+    <div id="gestureHint" aria-hidden="true"><span>☝︎</span><em id="gestureText">指で横へ動かす</em></div>
+
+    <footer>
+      <button id="prev" type="button" aria-label="前の工程">‹</button>
+      <div id="timeline" aria-label="19工程の進行"></div>
+      <button id="next" type="button" disabled aria-label="次の工程">›</button>
+    </footer>
+
+    <div id="completeCard" hidden>
+      <div class="card">
+        <p>19 / 19</p>
+        <h2>祝宴の花を、最後まで自分の手で扱いました。</h2>
+        <button id="again" type="button">もう一度つくる</button>
+      </div>
+    </div>
+
+    <div id="loading"><span></span><p>会場と花材を準備しています</p></div>
+    <div id="fallback" hidden><h2>3Dを読み込めませんでした</h2><p>インターネット接続を確認して再読み込みしてください。</p></div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
