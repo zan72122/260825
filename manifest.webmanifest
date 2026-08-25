@@ -1,0 +1,16 @@
+{
+  "name": "百二十四の層 — 輪島塗を、つくろう。",
+  "short_name": "百二十四の層",
+  "description": "木地から加飾・検品まで、輪島塗の見えない層を一本の指で作る4歳児向け3Dゲーム。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#120b08",
+  "theme_color": "#17100b",
+  "icons": [
+    {"src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

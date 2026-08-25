@@ -1,73 +1,143 @@
-'use strict';
-const els={
-  title:$('#title'),kana:$('#kana'),kicker:$('#kicker'),subtitle:$('#subtitle'),process:$('#process'),style:$('#styleLabel'),
-  counter:$('#variantCounter'),caption:$('#captionIndex'),start:$('#startButton'),prev:$('#prevButton'),next:$('#nextButton'),
-  gallery:$('#galleryButton'),brand:$('#brandButton'),tray:$('#variantTray'),close:$('#closeTrayButton'),grid:$('#variantGrid'),
-  preview:$('#previewPanel'),previewLabel:$('#previewLabel'),previewHint:$('#previewHint'),previewPercent:$('#previewPercent'),previewBar:$('#previewBar'),
-  orientation:$('#orientationLabel'),error:$('#errorPanel'),errorMessage:$('#errorMessage'),status:$('#renderStatus')
-};
-const state={cameraYaw:0,cameraPitch:0,preview:false,previewStart:0,progress:0};
-let renderer,active=getVariant(),pointer=null,drag=0,raf=0,last=performance.now(),returnFocus=null;
+import { CHAPTERS,PROCESS_STATES,WOOD_CHOICES,DECORATION_CHOICES } from './game-data.js';
+import { LAYERS } from './materials.js';
+import { clamp } from './math.js';
 
-const PREVIEW=[
-  {end:.14,label:'木地を挽く',hint:'木の内側と外側を、同じ厚みに近づける'},
-  {end:.28,label:'刻苧と布で守る',hint:'弱い場所を埋め、布を密着させる'},
-  {end:.54,label:'地の粉を三層',hint:'粗い粒から細かい粒へ。塗って、研ぐ'},
-  {end:.72,label:'中塗・上塗',hint:'埃を避け、長い刷毛で薄く均す'},
-  {end:.88,label:'湿り気の中で固める',hint:'塗師風呂で、急がず待つ'},
-  {end:1,label:'沈金・蒔絵',hint:'彫った溝へ金、漆で描いた面へ金粉'}
-];
-function previewStep(p){return PREVIEW.find(x=>p<=x.end)||PREVIEW.at(-1)}
-function luminance(color){const c=hex(color).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+const $=(s,root=document)=>root.querySelector(s);
+const $$=(s,root=document)=>[...root.querySelectorAll(s)];
 
-function applyVariant(v,{url=true,announce=true}={}){
-  active=v;const i=VARIANTS.indexOf(v);state.cameraYaw=0;state.cameraPitch=0;state.preview=false;state.progress=0;
-  document.body.dataset.variant=v.id;document.body.dataset.layout=v.layout;
-  const root=document.documentElement;
-  root.style.setProperty('--accent',v.accent);root.style.setProperty('--ink',v.ink);root.style.setProperty('--panel',v.panel);root.style.setProperty('--button',v.button);
-  root.style.setProperty('--line',luminance(v.ink)<.42?'rgba(0,0,0,.24)':'rgba(255,255,255,.28)');
-  $('meta[name="theme-color"]').setAttribute('content',v.button);
-  els.title.textContent=v.name;els.kana.textContent=v.kana;els.kicker.textContent=v.kicker;els.subtitle.textContent=v.subtitle;els.process.textContent=v.process;els.style.textContent=v.style;
-  els.counter.textContent=`${v.id} / ${String(VARIANTS.length).padStart(2,'0')}`;els.caption.textContent=`SCENE ${v.id}`;document.title=`${v.id} ${v.name} — 輪島塗を、つくろう。`;
-  els.preview.setAttribute('aria-hidden','true');els.start.dataset.active='false';els.start.querySelector('strong').textContent='つくりはじめる';els.start.querySelector('small').textContent='さわって、工程をのぞく';
-  renderer.setScene(BUILDERS[i]());
-  els.grid.querySelectorAll('.variant-card').forEach(card=>card.setAttribute('aria-current',card.dataset.id===v.id?'true':'false'));
-  if(url){const next=new URL(location.href);next.searchParams.set('v',v.id);next.hash='';history.replaceState({v:v.id},'',next)}
-  if(announce){document.body.dataset.ready='true';document.body.dataset.scene=v.slug;els.status.textContent=`ready:${v.id}:${v.slug}`}
-}
-function step(delta){const i=(VARIANTS.indexOf(active)+delta+VARIANTS.length)%VARIANTS.length;applyVariant(VARIANTS[i])}
-function makeCards(){
-  const frag=document.createDocumentFragment();
-  VARIANTS.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='variant-card';b.dataset.id=v.id;b.style.setProperty('--card-accent',v.accent);
-    b.innerHTML=`<span class="variant-card-top"><span class="variant-card-number">${v.id}</span><span class="variant-card-swatch" aria-hidden="true"></span></span><strong>${v.name}</strong><small>${v.style}</small>`;
-    b.addEventListener('click',()=>{applyVariant(v);closeTray()});frag.append(b)});
-  els.grid.append(frag);
-}
-function openTray(){returnFocus=document.activeElement;els.tray.hidden=false;requestAnimationFrame(()=>{const current=els.grid.querySelector('[aria-current="true"]');(current||els.close).focus({preventScroll:true});current?.scrollIntoView({block:'nearest'})})}
-function closeTray(){if(els.tray.hidden)return;els.tray.hidden=true;returnFocus?.focus?.({preventScroll:true})}
-function beginPreview(){state.preview=true;state.previewStart=performance.now();state.progress=0;els.preview.setAttribute('aria-hidden','false');els.start.dataset.active='true';els.start.querySelector('strong').textContent='工程を見ています';els.start.querySelector('small').textContent='もう一度押すと、最初から'}
-function updatePreview(now){
-  if(!state.preview)return;state.progress=clamp((now-state.previewStart)/6800,0,1);const stage=previewStep(state.progress);
-  els.previewLabel.textContent=stage.label;els.previewHint.textContent=stage.hint;els.previewPercent.textContent=`${Math.round(state.progress*100)}%`;els.previewBar.style.width=`${state.progress*100}%`;
-  if(state.progress>=1){state.preview=false;els.start.dataset.active='false';els.start.querySelector('strong').textContent='もういちど見る';els.start.querySelector('small').textContent='木地から完成まで、6.8秒の予告編';setTimeout(()=>els.preview.setAttribute('aria-hidden','true'),1000)}
-}
-function updateOrientation(){const portrait=innerHeight>innerWidth;document.body.dataset.orientation=portrait?'portrait':'landscape';els.orientation.textContent=portrait?'PORTRAIT / TOUCH READY':'LANDSCAPE / TOUCH READY'}
+export class GameUI{
+  constructor(options={}){
+    this.handlers=options.handlers||{};
+    this.home=$('#home');this.gameUI=$('#game-ui');this.finale=$('#finale');this.bookPanel=$('#book-panel');this.aboutPanel=$('#about-panel');this.explodedPanel=$('#exploded-panel');
+    this.startButton=$('#start-button');this.resumeButton=$('#resume-button');this.resumeLabel=$('#resume-label');
+    this.chapterTitle=$('#chapter-title');this.chapterKicker=$('#chapter-kicker');this.overallProgress=$('#overall-progress');this.overallLabel=$('#overall-label');
+    this.ribbon=$('#chapter-ribbon');this.ribbonNumber=$('#ribbon-number');this.ribbonGroup=$('#ribbon-group');this.ribbonTitle=$('#ribbon-title');
+    this.stepLabel=$('#step-label');this.instructionTitle=$('#instruction-title');this.instructionDetail=$('#instruction-detail');this.instructionIcon=$('#instruction-icon');this.stepRing=$('#step-meter-ring');this.stepPercent=$('#step-percent');
+    this.chapterDots=$('#chapter-dots');this.choicePanel=$('#choice-panel');this.complete=$('#chapter-complete');this.completeTitle=$('#complete-title');this.completeDetail=$('#complete-detail');this.completeKicker=$('#complete-kicker');
+    this.autoSequence=$('#auto-sequence');this.autoProgress=$('#auto-progress');this.autoTitle=$('#auto-title');this.autoDetail=$('#auto-detail');
+    this.hintPath=$('#hint-path');this.tapTarget=$('#tap-target');this.ghostHand=$('#ghost-hand');this.toastEl=$('#toast');this.soundButton=$('#sound-button');
+    this.processList=$('#process-list');this.bookCount=$('#book-count');this.layerCards=$('#layer-cards');this.toastTimer=null;this.currentChapter=0;this.currentStep=0;this.panelOrigin='game';this.autoRaf=0;
+    this.buildChapterDots();this.buildProcessList();this.buildLayerCards();this.bind();
+  }
 
-function bind(){
-  els.prev.addEventListener('click',()=>step(-1));els.next.addEventListener('click',()=>step(1));els.gallery.addEventListener('click',openTray);els.brand.addEventListener('click',()=>applyVariant(VARIANTS[0]));
-  els.close.addEventListener('click',closeTray);els.tray.querySelector('[data-close-tray]').addEventListener('click',closeTray);els.start.addEventListener('click',beginPreview);
-  canvas.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;pointer={id:e.pointerId,x:e.clientX,y:e.clientY};drag=0;canvas.setPointerCapture?.(e.pointerId)});
-  canvas.addEventListener('pointermove',e=>{if(!pointer||pointer.id!==e.pointerId)return;const dx=e.clientX-pointer.x,dy=e.clientY-pointer.y;pointer.x=e.clientX;pointer.y=e.clientY;drag+=Math.hypot(dx,dy);
-    /* 4歳児向け: 小さな移動を1.4倍前後の読みやすいカメラ応答へ。ただし上下反転はさせない。 */
-    state.cameraYaw+=dx*.0048;state.cameraPitch=clamp(state.cameraPitch+dy*.0036,-.38,.38)});
-  const release=e=>{if(!pointer||pointer.id!==e.pointerId)return;canvas.releasePointerCapture?.(e.pointerId);pointer=null;if(drag<9&&!state.preview)beginPreview()};
-  canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);
-  addEventListener('resize',updateOrientation,{passive:true});addEventListener('orientationchange',updateOrientation,{passive:true});
-  addEventListener('popstate',()=>applyVariant(getVariant(),{url:false}));
-  document.addEventListener('keydown',e=>{if(!els.tray.hidden&&e.key==='Escape'){closeTray();return}if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1);if((e.key==='g'||e.key==='G')&&els.tray.hidden)openTray()});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0}else if(!raf){last=performance.now();raf=requestAnimationFrame(loop)}});
-  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();showError(new Error('3D描画が一時停止しました。ページを再読み込みしてください。'))});
+  bind(){
+    this.startButton.addEventListener('click',()=>this.handlers.start?.(false));
+    this.resumeButton.addEventListener('click',()=>this.handlers.start?.(true));
+    $('#about-button').addEventListener('click',()=>this.openPanel(this.aboutPanel));
+    $('#close-about-button').addEventListener('click',()=>this.closePanel(this.aboutPanel));
+    $('#home-button').addEventListener('click',()=>this.handlers.home?.());
+    $('#book-button').addEventListener('click',()=>{this.panelOrigin='game';this.openPanel(this.bookPanel);this.handlers.book?.(true);});
+    $('#finale-book-button').addEventListener('click',()=>{this.panelOrigin='final';this.openPanel(this.bookPanel);this.handlers.book?.(true);});
+    $('#exploded-button').addEventListener('click',()=>{this.closePanel(this.bookPanel,false);this.openPanel(this.explodedPanel);this.handlers.exploded?.(true);});
+    $('#sound-button').addEventListener('click',()=>{const enabled=this.handlers.sound?.();this.setSound(enabled);});
+    $('#next-chapter-button').addEventListener('click',()=>this.handlers.nextChapter?.());
+    $('#reset-button').addEventListener('click',()=>{if(window.confirm('いままでの工程を消して、最初から作り直しますか？')){this.closePanel(this.aboutPanel);this.handlers.reset?.();}});
+    $('#finale-view-button').addEventListener('click',()=>this.handlers.finalSpin?.());
+    $('#new-game-button').addEventListener('click',()=>this.handlers.newGame?.());
+    $$('[data-close-panel]').forEach(button=>button.addEventListener('click',()=>{
+      const panel=button.closest('.panel');this.closePanel(panel);if(panel===this.bookPanel)this.handlers.book?.(false);if(panel===this.explodedPanel)this.handlers.exploded?.(false);
+    }));
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape'){
+        const open=[this.explodedPanel,this.bookPanel,this.aboutPanel].find(panel=>!panel.hidden);if(open){this.closePanel(open);if(open===this.explodedPanel)this.handlers.exploded?.(false);if(open===this.bookPanel)this.handlers.book?.(false);}
+      }
+    });
+  }
+
+  buildChapterDots(){
+    this.chapterDots.innerHTML='';CHAPTERS.forEach((chapter,index)=>{
+      const button=document.createElement('button');button.type='button';button.className='chapter-dot';button.dataset.index=index;button.setAttribute('aria-label',`${chapter.number} ${chapter.title}`);button.innerHTML=`<span>${chapter.number} ${chapter.short}</span>`;button.addEventListener('click',()=>this.handlers.jump?.(index));this.chapterDots.append(button);
+    });
+  }
+
+  buildProcessList(){
+    this.processList.innerHTML='';PROCESS_STATES.forEach((state,index)=>{
+      const item=document.createElement('li');item.dataset.index=index;item.innerHTML=`<div><strong>${state.name}</strong><small>${state.group} · ${state.detail}</small></div>`;this.processList.append(item);
+    });
+  }
+
+  buildLayerCards(){
+    this.layerCards.innerHTML='';LAYERS.forEach(layer=>{
+      const card=document.createElement('div');card.className='layer-card';card.style.setProperty('--swatch',layer.color);card.innerHTML=`<i></i><div><strong>${layer.name} <small>${layer.reading}</small></strong><small>${layer.detail}</small></div>`;this.layerCards.append(card);
+    });
+  }
+
+  setSaveAvailable(save){
+    const has=Boolean(save&&Number.isFinite(save.chapter)&&(save.chapter>0||save.step>0));
+    this.resumeButton.hidden=!has;if(has){const chapter=CHAPTERS[clamp(save.chapter,0,CHAPTERS.length-1)];this.resumeLabel.textContent=`${chapter.number} ${chapter.short} から`;this.startButton.querySelector('strong').textContent='もう一つ つくる';}
+    else this.startButton.querySelector('strong').textContent='つくりはじめる';
+  }
+
+  showHome(save){
+    this.home.classList.add('is-visible');this.gameUI.classList.remove('is-visible');this.finale.hidden=true;this.finale.classList.remove('is-visible');this.closeAllPanels();this.setSaveAvailable(save);this.hideChoice();this.hideComplete();this.autoSequence.hidden=true;
+  }
+
+  showGame(){
+    this.home.classList.remove('is-visible');this.finale.hidden=true;this.finale.classList.remove('is-visible');this.gameUI.classList.add('is-visible');this.closeAllPanels();
+  }
+
+  updateChapter(chapter,index,stepIndex=0,completedChapter=-1){
+    this.currentChapter=index;this.currentStep=stepIndex;this.chapterKicker.textContent=`工程 ${chapter.number} · ${chapter.group}`;this.chapterTitle.textContent=chapter.title;this.overallLabel.textContent=`${index+1} / ${CHAPTERS.length}`;this.overallProgress.style.width=`${((index+stepIndex/Math.max(1,chapter.steps.length))/CHAPTERS.length)*100}%`;
+    this.ribbonNumber.textContent=chapter.number;this.ribbonGroup.textContent=chapter.group;this.ribbonTitle.textContent=chapter.title;this.ribbon.classList.remove('is-visible');requestAnimationFrame(()=>this.ribbon.classList.add('is-visible'));setTimeout(()=>this.ribbon.classList.remove('is-visible'),2600);
+    $$('.chapter-dot',this.chapterDots).forEach((dot,i)=>{dot.classList.toggle('is-current',i===index);dot.classList.toggle('is-done',i<=completedChapter);dot.disabled=i>Math.max(index,completedChapter+1);});
+    this.updateStep(chapter.steps[stepIndex],stepIndex,chapter.steps.length);
+  }
+
+  updateStep(step,index,total){
+    if(!step)return;this.currentStep=index;this.stepLabel.textContent=`その ${index+1} / ${total}`;this.instructionTitle.textContent=step.title;this.instructionDetail.textContent=step.detail;this.instructionIcon.textContent=step.icon;this.setStepProgress(0);this.hideHint();
+  }
+
+  setStepProgress(progress){
+    const p=clamp(progress);this.stepRing.style.strokeDashoffset=String(119.38*(1-p));this.stepPercent.textContent=String(Math.round(p*100));
+  }
+
+  showHint(show,mode='swipe-free'){
+    this.hideHint();if(!show)return;
+    if(['tap-target','tap-repeat','tap-spots','choice'].includes(mode))this.tapTarget.classList.add('is-visible');
+    else if(mode==='drag'||mode==='trace'||mode==='dial'||mode==='circle'||mode==='radial'||mode==='long-stroke'||mode.startsWith('swipe')||mode==='rotate'||mode==='sprinkle'){this.hintPath.classList.add('is-visible');this.ghostHand.classList.add('is-visible');}
+  }
+  hideHint(){this.hintPath.classList.remove('is-visible');this.tapTarget.classList.remove('is-visible');this.ghostHand.classList.remove('is-visible');}
+
+  showChoice(type,selected,onSelect){
+    const choices=type==='wood'?WOOD_CHOICES:DECORATION_CHOICES;this.choicePanel.innerHTML='';this.choicePanel.hidden=false;
+    choices.forEach(choice=>{const button=document.createElement('button');button.type='button';button.className='choice-card';button.style.setProperty('--swatch',choice.color);button.classList.toggle('is-selected',choice.id===selected);button.innerHTML=`<i></i><strong>${choice.name}</strong><small>${choice.detail}</small>`;button.addEventListener('click',()=>{[...this.choicePanel.children].forEach(c=>c.classList.remove('is-selected'));button.classList.add('is-selected');onSelect(choice.id);});this.choicePanel.append(button);});
+  }
+  hideChoice(){this.choicePanel.hidden=true;this.choicePanel.innerHTML='';}
+
+  showComplete(chapter){
+    this.hideHint();this.hideChoice();this.completeKicker.textContent=`工程 ${chapter.number} できた！`;this.completeTitle.textContent=chapter.complete.title;this.completeDetail.textContent=chapter.complete.detail;this.complete.hidden=false;
+  }
+  hideComplete(){this.complete.hidden=true;}
+
+  playAuto(auto,onProgress,onDone){
+    if(!auto){onDone?.();return;}
+    cancelAnimationFrame(this.autoRaf);this.autoSequence.hidden=false;this.autoProgress.style.width='0%';
+    const start=performance.now(),duration=auto.duration||3500,beats=(auto.beats?.length?auto.beats:[{at:0,title:auto.title,detail:auto.detail}]).slice().sort((a,b)=>a.at-b.at);
+    let activeBeat=-1;
+    const frame=now=>{
+      const p=clamp((now-start)/duration);this.autoProgress.style.width=`${p*100}%`;
+      let nextBeat=0;for(let i=0;i<beats.length;i++)if(p>=beats[i].at)nextBeat=i;
+      if(nextBeat!==activeBeat){activeBeat=nextBeat;this.autoTitle.textContent=beats[activeBeat].title;this.autoDetail.textContent=beats[activeBeat].detail;this.autoSequence.classList.remove('is-beat');requestAnimationFrame(()=>this.autoSequence.classList.add('is-beat'));}
+      onProgress?.(p,activeBeat);
+      if(p<1)this.autoRaf=requestAnimationFrame(frame);else{setTimeout(()=>{this.autoSequence.hidden=true;this.autoSequence.classList.remove('is-beat');onDone?.();},260);}
+    };
+    this.autoRaf=requestAnimationFrame(frame);
+  }
+
+  updateBook(completed,current=-1){
+    const set=new Set(completed);this.bookCount.textContent=`${set.size} / ${PROCESS_STATES.length}`;
+    $$('#process-list li').forEach((item,index)=>{item.classList.toggle('is-done',set.has(index));item.classList.toggle('is-current',index===current);});
+  }
+
+  openPanel(panel){panel.hidden=false;requestAnimationFrame(()=>panel.classList.add('is-open'));}
+  closePanel(panel,restore=true){if(!panel)return;panel.classList.remove('is-open');panel.hidden=true;if(panel===this.explodedPanel&&restore)this.handlers.exploded?.(false);}
+  closeAllPanels(){[this.bookPanel,this.aboutPanel,this.explodedPanel].forEach(panel=>panel.hidden=true);}
+
+  setSound(enabled){this.soundButton.textContent=enabled?'♪':'×';this.soundButton.setAttribute('aria-label',enabled?'音を消す':'音を出す');}
+
+  toast(message,duration=1200){clearTimeout(this.toastTimer);this.toastEl.textContent=message;this.toastEl.classList.add('is-visible');this.toastTimer=setTimeout(()=>this.toastEl.classList.remove('is-visible'),duration);}
+
+  showFinal(state){
+    this.home.classList.remove('is-visible');this.gameUI.classList.remove('is-visible');this.finale.hidden=false;this.finale.classList.add('is-visible');$('#finale-method').textContent=state.decoration==='makie'?'蒔絵で、能登の波を描きました。':'沈金で、能登の波を彫りました。';$('#finale-date').textContent=new Intl.DateTimeFormat('ja-JP',{year:'numeric',month:'long',day:'numeric'}).format(new Date());
+  }
 }
-function loop(now){const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;updatePreview(now);renderer.render(now/1000,state,dt);raf=requestAnimationFrame(loop)}
-function showError(error){console.error(error);els.errorMessage.textContent=error instanceof Error?error.message:String(error);els.error.hidden=false;document.body.dataset.ready='error';els.status.textContent=`error:${els.errorMessage.textContent}`}
-try{makeCards();renderer=new Renderer(canvas);bind();updateOrientation();applyVariant(active,{url:false});raf=requestAnimationFrame(loop)}catch(error){showError(error)}

@@ -2,100 +2,190 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#17110d">
-  <meta name="description" content="4歳児向け輪島塗3Dモバイルゲームのトップページ比較実装。15のWebGLコンセプトを収録。">
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="styles.css">
-  <title>輪島塗を、つくろう。— 15の入口</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#17100b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="百二十四の層">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <title>百二十四の層 — 輪島塗を、つくろう。</title>
+  <link rel="stylesheet" href="./styles.css">
 </head>
-<body data-variant="01" data-layout="left" data-orientation="landscape">
-  <canvas id="stage" aria-label="輪島塗の工房を描いた3Dシーン"></canvas>
-  <div class="atmosphere" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
+<body>
+  <main id="app" aria-label="輪島塗を作る3Dゲーム">
+    <canvas id="stage" aria-label="輪島塗の3D工房"></canvas>
+    <div id="grain" aria-hidden="true"></div>
+    <div id="vignette" aria-hidden="true"></div>
 
-  <main class="app-shell">
-    <header class="masthead">
-      <button id="brandButton" class="brand" type="button" aria-label="最初の案へ戻る">
-        <span class="seal" aria-hidden="true">輪</span>
-        <span>
-          <strong>輪島塗を、つくろう。</strong>
-          <small>WAJIMA / TOUCH CRAFT</small>
-        </span>
-      </button>
-      <button id="galleryButton" class="gallery-button" type="button" aria-haspopup="dialog" aria-controls="variantTray">
-        <strong id="variantCounter">01 / 15</strong>
-        <span>案をくらべる</span>
-      </button>
-    </header>
-
-    <section class="hero" aria-live="polite">
-      <p id="kicker" class="kicker">写実案 01</p>
-      <h1 id="title">朝の塗師蔵</h1>
-      <p id="kana" class="kana">あさの ぬしぐら</p>
-      <p id="subtitle" class="subtitle">朝の斜光が、黒漆のわずかな刷毛目だけを拾う。</p>
-      <p id="process" class="process">木地から、百二十四の手へ。</p>
-    </section>
-
-    <section class="actions" aria-label="ゲーム開始">
-      <button id="startButton" class="start-button" type="button">
-        <span class="play" aria-hidden="true">▶</span>
-        <span>
-          <strong>つくりはじめる</strong>
-          <small>さわって、工程をのぞく</small>
-        </span>
-      </button>
-      <p class="gesture"><span aria-hidden="true"></span>画面をゆっくりなぞると、工房を見回せます</p>
-    </section>
-
-    <aside class="scene-caption" aria-label="現在の表現方式">
-      <span id="captionIndex">SCENE 01</span>
-      <i aria-hidden="true"></i>
-      <span id="styleLabel">暖色写実・深い奥行き</span>
-    </aside>
-
-    <nav class="step-nav" aria-label="トップページ案の切り替え">
-      <button id="prevButton" type="button" aria-label="前の案">‹</button>
-      <button id="nextButton" type="button" aria-label="次の案">›</button>
-    </nav>
-
-    <section id="previewPanel" class="preview" aria-live="polite" aria-hidden="true">
-      <div><strong id="previewLabel">木地を挽く</strong><span id="previewPercent">0%</span></div>
-      <div class="preview-track"><i id="previewBar"></i></div>
-      <p id="previewHint">木の形が生まれる</p>
-    </section>
-
-    <p id="orientationLabel" class="orientation">LANDSCAPE / TOUCH READY</p>
-  </main>
-
-  <section id="variantTray" class="variant-tray" role="dialog" aria-modal="true" aria-labelledby="trayTitle" hidden>
-    <button class="tray-backdrop" type="button" data-close-tray aria-label="一覧を閉じる"></button>
-    <div class="tray-panel">
-      <header>
+    <section id="home" class="screen is-visible" aria-labelledby="home-title">
+      <header class="brand brand--home">
+        <div class="brand-mark" aria-hidden="true"><span>輪</span></div>
         <div>
-          <p>TOP PAGE STUDY</p>
-          <h2 id="trayTitle">15の入口を、見比べる</h2>
+          <p class="brand-kicker">WAJIMA NURI · TOUCH CRAFT</p>
+          <p class="brand-name">輪島塗を、つくろう。</p>
         </div>
-        <button id="closeTrayButton" class="close" type="button" aria-label="閉じる">×</button>
       </header>
-      <p class="tray-intro">色替えではなく、光源、カメラ、材質、空間、写実度を案ごとに変えています。</p>
-      <div id="variantGrid" class="variant-grid"></div>
-      <footer><span>← → キーでも切替</span><span>全案 WebGL 実ジオメトリ</span></footer>
+
+      <div class="home-copy">
+        <p class="eyebrow">採用案 08 を本編化</p>
+        <h1 id="home-title">百二十四の層</h1>
+        <p class="home-reading">ひゃくにじゅうよんの そう</p>
+        <p class="home-lead">木をけずり、布でまもり、土と漆を何度も重ねる。<br>見えない層まで、一本の指でつくろう。</p>
+        <div class="home-actions">
+          <button id="start-button" class="primary-action" type="button">
+            <span class="play-mark" aria-hidden="true">▶</span>
+            <span><strong>つくりはじめる</strong><small>木地から、完成まで</small></span>
+          </button>
+          <button id="resume-button" class="secondary-action" type="button" hidden>
+            <span>つづきから</span><small id="resume-label"></small>
+          </button>
+        </div>
+      </div>
+
+      <aside class="layer-legend" aria-label="輪島塗の層">
+        <div><i style="--c:#b78b53"></i><span>木地</span></div>
+        <div><i style="--c:#c9b891"></i><span>布</span></div>
+        <div><i style="--c:#8e6845"></i><span>一辺地</span></div>
+        <div><i style="--c:#725139"></i><span>二辺地</span></div>
+        <div><i style="--c:#573c2d"></i><span>三辺地</span></div>
+        <div><i style="--c:#2b1510"></i><span>中塗</span></div>
+        <div><i style="--c:#120a08"></i><span>上塗</span></div>
+        <div><i style="--c:#c69d43"></i><span>加飾</span></div>
+      </aside>
+
+      <footer class="home-footer">
+        <button id="about-button" class="text-button" type="button">おとなの方へ</button>
+        <span>縦・横画面対応</span>
+        <span>オフライン動作</span>
+      </footer>
+    </section>
+
+    <section id="game-ui" class="screen" aria-label="ゲーム画面">
+      <header class="hud-top">
+        <button id="home-button" class="icon-button" type="button" aria-label="ホームへ戻る">⌂</button>
+        <div class="hud-title">
+          <p id="chapter-kicker">工程 01</p>
+          <h2 id="chapter-title">木をえらぶ</h2>
+        </div>
+        <div class="hud-progress" aria-label="全体の進み具合">
+          <div class="progress-track"><i id="overall-progress"></i></div>
+          <span id="overall-label">1 / 15</span>
+        </div>
+        <button id="sound-button" class="icon-button" type="button" aria-label="音を切り替える">♪</button>
+        <button id="book-button" class="icon-button icon-button--book" type="button" aria-label="工程帳を開く">帳</button>
+      </header>
+
+      <div id="chapter-ribbon" class="chapter-ribbon" aria-live="polite">
+        <span id="ribbon-number">01</span>
+        <div><small id="ribbon-group">木地づくり</small><strong id="ribbon-title">木をえらぶ</strong></div>
+      </div>
+
+      <div id="hint-path" class="hint-path" aria-hidden="true"><i></i></div>
+      <div id="tap-target" class="tap-target" aria-hidden="true"><i></i></div>
+      <div id="ghost-hand" class="ghost-hand" aria-hidden="true"><span></span></div>
+
+      <section id="instruction-card" class="instruction-card" aria-live="polite">
+        <div class="instruction-icon" id="instruction-icon" aria-hidden="true">☝</div>
+        <div class="instruction-copy">
+          <small id="step-label">その 1</small>
+          <strong id="instruction-title">木を えらんでね</strong>
+          <p id="instruction-detail">大きな木を、ぽんとタッチ。</p>
+        </div>
+        <div class="step-meter" aria-label="この操作の進み具合">
+          <svg viewBox="0 0 48 48" role="img"><circle class="meter-bg" cx="24" cy="24" r="19"></circle><circle id="step-meter-ring" class="meter-fg" cx="24" cy="24" r="19"></circle></svg>
+          <b id="step-percent">0</b>
+        </div>
+      </section>
+
+      <nav class="chapter-dots" id="chapter-dots" aria-label="工程一覧"></nav>
+
+      <div id="choice-panel" class="choice-panel" hidden></div>
+      <div id="chapter-complete" class="chapter-complete" hidden>
+        <div class="chapter-complete-card">
+          <small id="complete-kicker">できた！</small>
+          <h3 id="complete-title">木地が できました</h3>
+          <p id="complete-detail">次は、弱いところをなおします。</p>
+          <div id="complete-stamp" class="complete-stamp" aria-hidden="true">輪</div>
+          <button id="next-chapter-button" class="primary-action primary-action--compact" type="button"><span class="play-mark">▶</span><span><strong>つぎへ</strong><small>工程をつづける</small></span></button>
+        </div>
+      </div>
+
+      <div id="auto-sequence" class="auto-sequence" hidden aria-live="polite">
+        <div class="auto-line"><i id="auto-progress"></i></div>
+        <small>職人の仕事を見ています</small>
+        <strong id="auto-title">木を、ゆっくり乾かします。</strong>
+        <p id="auto-detail">急がず、ゆがみが落ち着くまで待ちます。</p>
+      </div>
+    </section>
+
+    <section id="book-panel" class="panel" hidden aria-labelledby="book-title">
+      <div class="panel-backdrop" data-close-panel></div>
+      <article class="panel-sheet process-book">
+        <header class="panel-header">
+          <div><small>つくった跡が、ぜんぶ残る</small><h2 id="book-title">輪島塗 工程帳</h2></div>
+          <button class="icon-button" type="button" data-close-panel aria-label="閉じる">×</button>
+        </header>
+        <div class="book-summary">
+          <div class="book-bowl" aria-hidden="true"><i></i></div>
+          <div><strong id="book-count">0 / 32</strong><span>の状態を見ました</span></div>
+          <button id="exploded-button" class="secondary-action secondary-action--small" type="button">断面をみる</button>
+        </div>
+        <ol id="process-list" class="process-list"></ol>
+      </article>
+    </section>
+
+    <section id="about-panel" class="panel" hidden aria-labelledby="about-title">
+      <div class="panel-backdrop" data-close-panel></div>
+      <article class="panel-sheet panel-sheet--narrow">
+        <header class="panel-header">
+          <div><small>保護者・教育者向け</small><h2 id="about-title">このゲームについて</h2></div>
+          <button class="icon-button" type="button" data-close-panel aria-label="閉じる">×</button>
+        </header>
+        <div class="about-copy">
+          <p>輪島塗の木地、布着せ、輪島地の粉による三層の下地、中塗、上塗、塗師風呂、呂色、沈金・蒔絵、検品を、15章で一続きに体験します。</p>
+          <p>4歳児が扱いやすいよう、判定は見た目より広く、指の移動は少し増幅します。誤操作で失敗にはならず、約2.4秒止まると短い手本が現れます。</p>
+          <p>層厚や粒径は説明中だけ読みやすく拡大します。通常の器は実寸比へ戻り、漆や金を発光させず、光源を受ける材質として描きます。</p>
+          <div class="parent-actions">
+            <button id="reset-button" class="danger-button" type="button">最初からやり直す</button>
+            <button id="close-about-button" class="secondary-action secondary-action--small" type="button">閉じる</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section id="exploded-panel" class="panel panel--transparent" hidden aria-labelledby="exploded-title">
+      <div class="panel-backdrop" data-close-panel></div>
+      <article class="exploded-sheet">
+        <header class="panel-header panel-header--light">
+          <div><small>完成した器の、見えない内側</small><h2 id="exploded-title">百二十四の層</h2></div>
+          <button class="icon-button" type="button" data-close-panel aria-label="閉じる">×</button>
+        </header>
+        <div id="layer-cards" class="layer-cards"></div>
+        <p>画面を横になぞると、断面をゆっくり回せます。</p>
+      </article>
+    </section>
+
+    <section id="finale" class="screen finale" hidden aria-labelledby="finale-title">
+      <div class="finale-copy">
+        <p class="eyebrow">すべての工程を終えました</p>
+        <h2 id="finale-title">あなたの輪島塗</h2>
+        <p id="finale-method">沈金で、能登の波を入れました。</p>
+        <div class="finale-actions">
+          <button id="finale-view-button" class="primary-action" type="button"><span class="play-mark">↻</span><span><strong>うつわを まわす</strong><small>光のうつり方を見る</small></span></button>
+          <button id="finale-book-button" class="secondary-action" type="button">32の工程を見る</button>
+          <button id="new-game-button" class="text-button text-button--light" type="button">もう一つ、つくる</button>
+        </div>
+      </div>
+      <div class="finale-signature"><span>完成</span><strong id="finale-date"></strong></div>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="webgl-error" class="webgl-error" hidden>
+      <h1>3D表示を始められませんでした</h1>
+      <p>SafariまたはChromeの最新版で開き、WebGLを有効にしてください。</p>
     </div>
-  </section>
-
-  <section id="errorPanel" class="error-panel" role="alert" hidden>
-    <strong>3D表示を開始できませんでした</strong>
-    <p id="errorMessage">WebGL 2を有効にして、再読み込みしてください。</p>
-  </section>
-
-  <div id="renderStatus" class="render-status" aria-hidden="true">initializing</div>
-  <script src="src/core.js"></script>
-  <script src="src/renderer.js"></script>
-  <script src="src/scene-kit.js"></script>
-  <script src="src/variants.js"></script>
-  <script src="src/scenes-a.js"></script>
-  <script src="src/scenes-b.js"></script>
-  <script src="src/ui.js"></script>
+  </main>
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>

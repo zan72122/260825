@@ -1,0 +1,12 @@
+{
+  "name": "wajima-124-layers-game",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 4173",
+    "check": "for f in src/*.js sw.js; do node --check \"$f\"; done",
+    "test": "node tests/smoke.mjs",
+    "test:all": "npm run check && npm test"
+  }
+}

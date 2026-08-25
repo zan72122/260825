@@ -1,3 +1,4 @@
 .DS_Store
-captures/
-*-test*.png
+screenshots/
+*.log
+bundle-test.js
