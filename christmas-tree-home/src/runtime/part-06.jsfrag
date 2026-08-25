@@ -1,0 +1,372 @@
+const variants = [
+  {
+    id: 'biltmore-hall',
+    ui: 'heritage',
+    place: 'ASHEVILLE · USA',
+    kicker: '35フィートの木を、みんなで立てる朝',
+    title: '大広間に木がやってきた',
+    description: '重い生木、床養生、木箱、足場、長い装飾竿。完成画だけでなく、現場の途中から本物らしさを見せます。',
+    materials: 'FRASER FIR · LIMESTONE · OAK · IRON',
+    startOverline: 'さいしょのしごと',
+    startLabel: '木をむかえにいく',
+    startModalCopy: '設計図と大広間を見比べ、入口・天井・床荷重に収まる木を選びます。次回以降、本編の第1章として実装します。',
+    build: buildBiltmoreHall,
+  },
+  {
+    id: 'new-york-plaza',
+    ui: 'metropolis',
+    place: 'NEW YORK · USA',
+    kicker: '街の大きさで、一本の木を読む',
+    title: '青い街に、金の灯り',
+    description: '高層建築、スケートリンク、群衆、安全柵。都市の巨大ツリーを、人と建物の尺度で実感する入口です。',
+    materials: 'FIR · GRANITE · STEEL · ICE',
+    startOverline: 'まちのしごと',
+    startLabel: 'ひろばをはかる',
+    startModalCopy: '人の流れ、非常動線、風、見上げ角度を確かめて、巨大木を置ける範囲を探します。',
+    build: buildNewYorkPlaza,
+  },
+  {
+    id: 'nuremberg-market',
+    ui: 'market',
+    place: 'NÜRNBERG · GERMANY',
+    kicker: '木の飾りを、屋台から運ぶ夕方',
+    title: '雪あがりのクリスマス市',
+    description: '半木骨の建物、石畳、木箱、手仕事の飾り。売場と中央ツリーの物流まで一つの景色にします。',
+    materials: 'SPRUCE · TIMBER · COBBLE · WOOL',
+    startOverline: 'てづくりのしごと',
+    startLabel: 'かざりを分ける',
+    startModalCopy: '木・紙・ガラスなど、壊れやすさと重さが違う飾りを箱から出し、置き場所ごとに分けます。',
+    build: buildNurembergMarket,
+  },
+  {
+    id: 'tokyo-atrium',
+    ui: 'precision',
+    place: 'TOKYO · JAPAN',
+    kicker: '吹抜けを、ミリ単位で使う正午',
+    title: '百貨店の設営日',
+    description: '磨石床、ガラス天井、搬入リフト、測定棒、安全柵。華やかさより先に、施工精度が見える画面です。',
+    materials: 'ARTIFICIAL FIR · GLASS · STEEL · STONE',
+    startOverline: 'せいかくなしごと',
+    startLabel: '高さをたしかめる',
+    startModalCopy: '天井、照明、スプリンクラー、搬入リフトを測り、木の高さと作業足場を決めます。',
+    build: buildTokyoAtrium,
+  },
+  {
+    id: 'okinawa-terrace',
+    ui: 'island',
+    place: 'OKINAWA · JAPAN',
+    kicker: '海風に負けないよう、支える夕方',
+    title: '南の島のクリスマス',
+    description: 'サンゴ石、湿った夕日、ヤシ、重いバラスト、支線、防滴配線。雪を足さず、沖縄の条件から形を決めます。',
+    materials: 'FIR · CORAL STONE · STAINLESS STEEL · SALT AIR',
+    startOverline: 'かぜのしごと',
+    startLabel: 'おもりを置く',
+    startModalCopy: '風向きと風の強さを見ながら、スタンドの重りと支線を置き、屋外用の配線を選びます。',
+    build: buildOkinawaTerrace,
+  },
+  {
+    id: 'helsinki-living-room',
+    ui: 'nordic',
+    place: 'HELSINKI · FINLAND',
+    kicker: '子どもの目の高さで飾る冬の朝',
+    title: '小さな居間の生木',
+    description: '使い込んだ家具、窓の冷たい光、紙と麦わらの飾り。大規模施工ではなく、家族の手が届く現実です。',
+    materials: 'SPRUCE · BIRCH · PAPER · STRAW',
+    startOverline: 'おうちのしごと',
+    startLabel: '木をまっすぐ立てる',
+    startModalCopy: '小さなスタンドへ幹を入れ、少し離れて傾きを見て、家族で真っすぐに直します。',
+    build: buildHelsinkiLivingRoom,
+  },
+  {
+    id: 'oaxaca-courtyard',
+    ui: 'folk',
+    place: 'OAXACA · MÉXICO',
+    kicker: '紙と錫が風に揺れる金色の薄暮',
+    title: '中庭を手仕事で満たす',
+    description: '漆喰、テラコッタ、切り紙、錫の星。軽い飾りは内側、風を受けにくい飾りは枝先へ置きます。',
+    materials: 'PINE · STUCCO · TIN · PAPER',
+    startOverline: 'いろのしごと',
+    startLabel: '軽い飾りを選ぶ',
+    startModalCopy: '風で飛びやすい紙、硬い錫、割れやすい球を見分け、枝と場所に合う飾りを選びます。',
+    build: buildOaxacaCourtyard,
+  },
+  {
+    id: 'czech-glass-workshop',
+    ui: 'workshop',
+    place: 'JABLONEC · CZECHIA',
+    kicker: '飾る前に、ガラスをつくる炉火の夜',
+    title: '火から生まれる飾り',
+    description: '煉瓦炉、鉄の吹き竿、作業台、冷却中の薄い球。完成品の手前にある熱と道具を主役にします。',
+    materials: 'GLASS · BRICK · IRON · FIR',
+    startOverline: 'こうぼうのしごと',
+    startLabel: 'ガラスの球を選ぶ',
+    startModalCopy: '冷めた球だけを持ち、欠けやひびを見つけて、軽い物からトレーへ並べます。',
+    build: buildCzechGlassWorkshop,
+  },
+  {
+    id: 'loire-salon',
+    ui: 'salon',
+    place: 'LOIRE · FRANCE',
+    kicker: '暖炉と蝋燭だけで材質を読む夜',
+    title: '石のサロンの静かな光',
+    description: '石灰岩、寄木床、ベルベット、古いガラス。低照度で、針葉・金属・布の反射差を丁寧に見せます。',
+    materials: 'FIR · LIMESTONE · VELVET · OLD GLASS',
+    startOverline: 'ひかりのしごと',
+    startLabel: '灯りの間隔を見る',
+    startModalCopy: '部屋を少し暗くして、明るすぎる所と暗い穴を探し、電球の間隔を整えます。',
+    build: buildLoireSalon,
+  },
+  {
+    id: 'lapland-raising',
+    ui: 'arctic',
+    place: 'LAPLAND · FINLAND',
+    kicker: '飾る前の一本を、綱で起こす朝',
+    title: '雪原の起立作業',
+    description: '未装飾の木、圧雪、そり、綱、複数人の身体。ツリーの華やかさではなく、重量と協働が主役です。',
+    materials: 'SPRUCE · SNOW · ROPE · STEEL',
+    startOverline: 'ちからのしごと',
+    startLabel: 'みんなで綱を引く',
+    startModalCopy: '合図に合わせて綱を引き、木が少しずつ起きる重さを、長いドラッグ操作で体験します。',
+    build: buildLaplandRaising,
+  },
+  {
+    id: 'auckland-garden',
+    ui: 'summer',
+    place: 'AUCKLAND · NEW ZEALAND',
+    kicker: '強い真夏の日差しで飾る正午',
+    title: '夏の庭のクリスマス',
+    description: '乾いた芝、木デッキ、硬い影、日除け。雪や冬色に頼らず、南半球の季節に成立する画面です。',
+    materials: 'FIR · GRASS · TIMBER · SUNLIGHT',
+    startOverline: 'なつのしごと',
+    startLabel: '日なたと日陰を比べる',
+    startModalCopy: '飾りが熱くなりすぎない場所、コードを踏まない道、木が乾きにくい位置を探します。',
+    build: buildAucklandGarden,
+  },
+  {
+    id: 'edinburgh-station',
+    ui: 'station',
+    place: 'EDINBURGH · SCOTLAND',
+    kicker: '列車と人流の間で設営する雨の夕方',
+    title: '大屋根の下の搬入',
+    description: '鉄骨とガラス、濡れた石床、台車、列車、安全柵。人が動き続ける公共空間での仕事です。',
+    materials: 'FIR · WROUGHT IRON · GLASS · WET STONE',
+    startOverline: 'えきのしごと',
+    startLabel: '通れる道をつくる',
+    startModalCopy: '乗客の通路をふさがないよう、台車・木箱・安全柵を順番に置いて搬入路を作ります。',
+    build: buildEdinburghStation,
+  },
+  {
+    id: 'kyoto-machiya',
+    ui: 'machiya',
+    place: 'KYOTO · JAPAN',
+    kicker: '障子の光に、現代の行事を置く薄暮',
+    title: '町家に小さなツリー',
+    description: '畳、土壁、障子、和紙。古い日本の習俗と偽らず、現代の家に静かに取り入れる設計です。',
+    materials: 'FIR · TATAMI · WASHI · EARTH PLASTER',
+    startOverline: 'まもるしごと',
+    startLabel: '畳に保護板を置く',
+    startModalCopy: '水と重さから畳を守る板を敷き、障子や火気から離して、小さな木の場所を決めます。',
+    build: buildKyotoMachiya,
+  },
+  {
+    id: 'technical-cutaway',
+    ui: 'technical',
+    place: 'TECHNICAL BAY · CUTAWAY',
+    kicker: '隠れる構造を、全部見せる中立昼光',
+    title: '支え・水・電気の裏側',
+    description: 'スタンド、水槽、ボルト、支線、重り、配線、足場、床養生。飾りの裏で働く構造を隠しません。',
+    materials: 'FIR · STEEL · WATER · ELECTRICAL CABLE',
+    startOverline: 'しくみのしごと',
+    startLabel: '支えを組み立てる',
+    startModalCopy: '脚を開き、水槽へ幹を入れ、ボルトを順番に締め、支線と重りで倒れない構造を作ります。',
+    build: buildTechnicalCutaway,
+  },
+];
+
+function updateCopy(variant, index) {
+  document.body.dataset.ui = variant.ui;
+  sceneNumber.textContent = `${String(index + 1).padStart(2, '0')} / ${String(variants.length).padStart(2, '0')}`;
+  scenePlace.textContent = variant.place;
+  sceneKicker.textContent = variant.kicker;
+  sceneTitle.textContent = variant.title;
+  sceneDescription.textContent = variant.description;
+  materialCaption.textContent = variant.materials;
+  startOverline.textContent = variant.startOverline;
+  startLabel.textContent = variant.startLabel;
+  startModalCopy.textContent = variant.startModalCopy;
+  variantDots.querySelectorAll('.variant-dot').forEach((dot, dotIndex) => {
+    dot.setAttribute('aria-selected', String(dotIndex === index));
+    dot.tabIndex = dotIndex === index ? 0 : -1;
+  });
+}
+
+function createVariantDots() {
+  variants.forEach((variant, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'variant-dot';
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-label', `${index + 1}: ${variant.title}`);
+    button.setAttribute('aria-selected', String(index === 0));
+    button.tabIndex = index === 0 ? 0 : -1;
+    button.innerHTML = `<span>${variant.title}</span>`;
+    button.addEventListener('click', () => switchVariant(index, index > activeVariantIndex ? 1 : -1));
+    variantDots.appendChild(button);
+  });
+}
+
+function buildVariant(index) {
+  worldUpdate = null;
+  const variant = variants[index];
+  const newRoot = variant.build();
+  scene.add(newRoot);
+  const previousRoot = activeRoot;
+  activeRoot = newRoot;
+  if (previousRoot && previousRoot !== newRoot) disposeWorld(previousRoot);
+  updateCopy(variant, index);
+  camera.lookAt(cameraTarget);
+  renderer.render(scene, camera);
+}
+
+function switchVariant(requestedIndex, direction = 1) {
+  if (switching || variants.length === 0) return;
+  const nextIndex = (requestedIndex + variants.length) % variants.length;
+  if (nextIndex === activeVariantIndex && app.classList.contains('is-ready')) return;
+  switching = true;
+  copyPanel.classList.add('is-switching');
+  playTone(direction >= 0 ? 560 : 470, .075, .025);
+  window.setTimeout(() => {
+    activeVariantIndex = nextIndex;
+    try {
+      buildVariant(activeVariantIndex);
+    } catch (error) {
+      console.error(`Scene ${activeVariantIndex + 1} failed:`, error);
+      announce('この会場を組み立て直しています');
+    }
+    requestAnimationFrame(() => {
+      copyPanel.classList.remove('is-switching');
+      switching = false;
+    });
+  }, reducedMotion ? 0 : 135);
+}
+
+function openModal(modal) {
+  modal.hidden = false;
+  const focusTarget = modal.querySelector('button');
+  requestAnimationFrame(() => focusTarget?.focus({ preventScroll: true }));
+  playTone(620, .1, .032);
+}
+
+function closeModal(modal) {
+  modal.hidden = true;
+  playTone(430, .07, .022);
+}
+
+function setupInterface() {
+  createVariantDots();
+  previousButton.addEventListener('click', () => switchVariant(activeVariantIndex - 1, -1));
+  nextButton.addEventListener('click', () => switchVariant(activeVariantIndex + 1, 1));
+  startButton.addEventListener('click', () => openModal(startModal));
+  infoButton.addEventListener('click', () => openModal(infoModal));
+  soundButton.addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    soundButton.setAttribute('aria-pressed', String(soundEnabled));
+    if (soundEnabled) {
+      unlockAudio();
+      playTone(660, .13, .035);
+      announce('操作音をオンにしました');
+    } else {
+      announce('操作音をオフにしました');
+    }
+  });
+  document.querySelectorAll('[data-close-modal]').forEach((element) => {
+    element.addEventListener('click', () => {
+      const modal = element.closest('.modal');
+      if (modal) closeModal(modal);
+    });
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') switchVariant(activeVariantIndex - 1, -1);
+    if (event.key === 'ArrowRight') switchVariant(activeVariantIndex + 1, 1);
+    if (event.key === 'Escape') {
+      if (!infoModal.hidden) closeModal(infoModal);
+      if (!startModal.hidden) closeModal(startModal);
+    }
+  });
+}
+
+function normalizedPointer(event) {
+  return {
+    x: event.clientX / Math.max(1, window.innerWidth) * 2 - 1,
+    y: event.clientY / Math.max(1, window.innerHeight) * 2 - 1,
+  };
+}
+
+canvas.addEventListener('pointerdown', (event) => {
+  pointerDown = true;
+  pointerMoved = false;
+  pointerStartX = pointerLastX = event.clientX;
+  pointerStartY = pointerLastY = event.clientY;
+  canvas.setPointerCapture?.(event.pointerId);
+}, { passive: true });
+
+canvas.addEventListener('pointermove', (event) => {
+  const normalized = normalizedPointer(event);
+  targetParallaxX = clamp(normalized.x, -1, 1);
+  targetParallaxY = clamp(normalized.y, -1, 1);
+  if (!pointerDown) return;
+  pointerLastX = event.clientX;
+  pointerLastY = event.clientY;
+  if (Math.hypot(pointerLastX - pointerStartX, pointerLastY - pointerStartY) > 7) pointerMoved = true;
+}, { passive: true });
+
+canvas.addEventListener('pointerup', (event) => {
+  if (!pointerDown) return;
+  pointerDown = false;
+  const deltaX = event.clientX - pointerStartX;
+  const deltaY = event.clientY - pointerStartY;
+  const threshold = isCoarsePointer ? 28 : 42;
+  if (Math.abs(deltaX) >= threshold && Math.abs(deltaX) > Math.abs(deltaY) * .78) {
+    switchVariant(activeVariantIndex + (deltaX < 0 ? 1 : -1), deltaX < 0 ? 1 : -1);
+  }
+  canvas.releasePointerCapture?.(event.pointerId);
+}, { passive: true });
+
+canvas.addEventListener('pointercancel', () => { pointerDown = false; }, { passive: true });
+canvas.addEventListener('pointerleave', () => {
+  if (!pointerDown) {
+    targetParallaxX = 0;
+    targetParallaxY = 0;
+  }
+}, { passive: true });
+
+function renderFrame() {
+  const elapsed = clock.getElapsedTime();
+  parallaxX = lerp(parallaxX, targetParallaxX, reducedMotion ? .22 : .055);
+  parallaxY = lerp(parallaxY, targetParallaxY, reducedMotion ? .22 : .055);
+
+  const portraitFactor = clamp((.9 - camera.aspect) / .55, 0, 1);
+  const distanceScale = 1 + portraitFactor * .35;
+  tmpVecA.copy(baseCameraPosition).sub(cameraTarget).multiplyScalar(distanceScale).add(cameraTarget);
+  tmpVecA.x += parallaxX * (reducedMotion ? .06 : .42);
+  tmpVecA.y += -parallaxY * (reducedMotion ? .04 : .26) + portraitFactor * .32;
+  tmpVecA.z += parallaxX * (reducedMotion ? .02 : .11);
+  desiredCameraPosition.copy(tmpVecA);
+  camera.position.lerp(desiredCameraPosition, reducedMotion ? .2 : .065);
+  tmpVecB.copy(cameraTarget);
+  tmpVecB.x += parallaxX * (reducedMotion ? .015 : .14);
+  tmpVecB.y += -parallaxY * (reducedMotion ? .01 : .08);
+  camera.lookAt(tmpVecB);
+
+  if (worldUpdate) worldUpdate(elapsed);
+  renderer.render(scene, camera);
+}
+
+setupInterface();
+buildVariant(0);
+renderer.setAnimationLoop(renderFrame);
+requestAnimationFrame(() => {
+  app.classList.add('is-ready');
+  app.setAttribute('aria-busy', 'false');
+  staticFallback.setAttribute('aria-hidden', 'true');
+});
