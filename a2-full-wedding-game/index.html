@@ -6,6 +6,16 @@
   <meta name="theme-color" content="#c65a4a">
   <title>A2 コーラル・リボン・パレード — 全工程ゲーム</title>
   <link rel="stylesheet" href="./styles.css">
+  <style>
+    #loading[hidden], #fallback[hidden], #completeCard[hidden] { display:none !important; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js": "./three-bridge.js"
+    }
+  }
+  </script>
 </head>
 <body>
   <div id="app">
@@ -40,9 +50,9 @@
     </div>
 
     <div id="loading"><span></span><p>会場と花材を準備しています</p></div>
-    <div id="fallback" hidden><h2>3Dを読み込めませんでした</h2><p>インターネット接続を確認して再読み込みしてください。</p></div>
+    <div id="fallback" hidden><h2>3Dを読み込めませんでした</h2><p>起動処理で問題が発生しました。ページを再読み込みしてください。</p></div>
   </div>
 
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./bootstrap.js"></script>
 </body>
 </html>
