@@ -1,0 +1,232 @@
+  state.index = (index + variants.length) % variants.length;
+  const config = variants[state.index];
+  app.dataset.uiTone = config.uiTone;
+  app.dataset.style = config.style;
+  document.documentElement.style.setProperty('--accent', config.accent);
+  document.documentElement.style.setProperty('--accent-soft', config.accentSoft);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', `#${new THREE.Color(config.background).getHexString()}`);
+  variantNumber.textContent = config.number;
+  variantEyebrow.textContent = config.eyebrow;
+  variantTitle.textContent = config.title;
+  variantDescription.textContent = config.description;
+  weatherLayer.className = config.weather === 'rain' ? 'rain' : '';
+  scene.background = new THREE.Color(config.background);
+  scene.fog = new THREE.FogExp2(config.fog, config.layout === 'garden' ? .018 : config.layout === 'diorama' ? .012 : .026);
+  renderer.toneMappingExposure = config.exposure;
+  configureLights(config);
+  buildWorld(config);
+  const view = responsiveCamera(config);
+  camera.fov = view.fov;
+  camera.updateProjectionMatrix();
+  state.cameraFrom.copy(camera.position);
+  state.targetFrom.copy(state.targetTo.lengthSq() ? state.targetTo : view.target);
+  state.cameraTo.copy(view.position);
+  state.targetTo.copy(view.target);
+  if (!animate || state.reducedMotion) {
+    camera.position.copy(state.cameraTo);
+    camera.lookAt(state.targetTo);
+    state.transitionStart = -Infinity;
+  } else {
+    // A tiny lateral start offset conveys direction without a carousel gimmick.
+    state.cameraFrom.x += direction * .45;
+    state.transitionStart = performance.now();
+  }
+  state.cameraNudge.set(0,0);
+  state.cameraNudgeTarget.set(0,0);
+  Array.from(variantRail.children).forEach((button, i) => {
+    const selected = i === state.index;
+    button.setAttribute('aria-selected', String(selected));
+    button.classList.toggle('selected', selected);
+    if (selected) button.scrollIntoView({ block: 'nearest', inline: 'center', behavior: state.reducedMotion ? 'auto' : 'smooth' });
+  });
+  playChime(260 + state.index * 13, .045);
+}
+
+function setupRail() {
+  variants.forEach((variant, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.role = 'tab';
+    button.className = 'variant-tab';
+    button.setAttribute('aria-label', `${variant.number} ${variant.title}`);
+    button.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+    button.innerHTML = `<span>${variant.number}</span><b>${variant.tab}</b>`;
+    button.addEventListener('click', () => applyVariant(index, true, index >= state.index ? 1 : -1));
+    variantRail.appendChild(button);
+  });
+}
+
+function nextVariant(direction = 1) {
+  applyVariant(state.index + direction, true, direction);
+}
+
+function pointerDown(event) {
+  if (event.target.closest('button, .sheet, .start-transition')) return;
+  state.pointerDown = true;
+  state.pointerStart.set(event.clientX, event.clientY);
+  state.pointerLast.copy(state.pointerStart);
+  state.dragDistance = 0;
+  canvas.setPointerCapture?.(event.pointerId);
+}
+
+function pointerMove(event) {
+  const nx = (event.clientX / innerWidth) * 2 - 1;
+  const ny = (event.clientY / innerHeight) * 2 - 1;
+  state.cameraNudgeTarget.set(nx * .38, -ny * .2);
+  if (!state.pointerDown) return;
+  const deltaX = event.clientX - state.pointerLast.x;
+  const deltaY = event.clientY - state.pointerLast.y;
+  state.dragDistance += Math.hypot(deltaX, deltaY);
+  state.pointerLast.set(event.clientX, event.clientY);
+}
+
+function pointerUp(event) {
+  if (!state.pointerDown) return;
+  state.pointerDown = false;
+  const dx = event.clientX - state.pointerStart.x;
+  const dy = event.clientY - state.pointerStart.y;
+  // High sensitivity: a 42 px horizontal motion is enough for a four-year-old's short swipe.
+  if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.15) nextVariant(dx < 0 ? 1 : -1);
+}
+
+function openSheet() {
+  infoPanel.setAttribute('aria-hidden','false');
+  infoPanel.classList.add('open');
+  infoPanel.querySelector('.sheet-close')?.focus();
+}
+
+function closeSheet() {
+  infoPanel.setAttribute('aria-hidden','true');
+  infoPanel.classList.remove('open');
+  infoButton.focus();
+}
+
+function openStart() {
+  startPanel.setAttribute('aria-hidden','false');
+  startPanel.classList.add('open');
+  playChime(392,.18);
+  setTimeout(() => returnButton.focus(), state.reducedMotion ? 0 : 420);
+}
+
+function closeStart() {
+  startPanel.setAttribute('aria-hidden','true');
+  startPanel.classList.remove('open');
+  startButton.focus();
+}
+
+function ensureAudio() {
+  if (!state.audioContext) state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (state.audioContext.state === 'suspended') state.audioContext.resume();
+}
+
+function playChime(frequency = 330, volume = .06) {
+  if (!state.soundOn) return;
+  ensureAudio();
+  const now = state.audioContext.currentTime;
+  const oscillator = state.audioContext.createOscillator();
+  const gain = state.audioContext.createGain();
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency, now);
+  oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.5, now + .18);
+  gain.gain.setValueAtTime(.0001, now);
+  gain.gain.exponentialRampToValueAtTime(volume, now + .018);
+  gain.gain.exponentialRampToValueAtTime(.0001, now + .42);
+  oscillator.connect(gain).connect(state.audioContext.destination);
+  oscillator.start(now); oscillator.stop(now + .45);
+}
+
+function toggleSound() {
+  state.soundOn = !state.soundOn;
+  soundButton.setAttribute('aria-pressed', String(state.soundOn));
+  soundButton.classList.toggle('active', state.soundOn);
+  if (state.soundOn) {
+    ensureAudio();
+    playChime(330,.07);
+  }
+}
+
+function resize() {
+  if (!renderer || !camera) return;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, innerWidth < 700 ? 1.45 : 1.7));
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / innerHeight;
+  const view = responsiveCamera(variants[state.index]);
+  camera.fov = view.fov;
+  camera.updateProjectionMatrix();
+  state.cameraTo.copy(view.position);
+  state.targetTo.copy(view.target);
+  if (state.transitionStart === -Infinity) camera.position.copy(view.position);
+}
+
+function animate(now) {
+  const elapsed = state.clock.getElapsedTime();
+  const t = state.transitionStart === -Infinity ? 1 : THREE.MathUtils.clamp((now - state.transitionStart) / state.transitionDuration, 0, 1);
+  const eased = 1 - Math.pow(1 - t, 4);
+  const position = state.cameraFrom.clone().lerp(state.cameraTo, eased);
+  const target = state.targetFrom.clone().lerp(state.targetTo, eased);
+  state.cameraNudge.lerp(state.cameraNudgeTarget, .045);
+  position.x += state.cameraNudge.x;
+  position.y += state.cameraNudge.y + Math.sin(elapsed*.22)*.015;
+  target.x += state.cameraNudge.x*.14;
+  target.y += state.cameraNudge.y*.08;
+  camera.position.copy(position);
+  camera.lookAt(target);
+  state.sway.forEach(({object,amount,phase})=>{
+    object.rotation.z = Math.sin(elapsed*.55+phase)*amount;
+    object.rotation.x = Math.cos(elapsed*.39+phase)*amount*.5;
+  });
+  state.candleLights.forEach(({light,flame,phase})=>{
+    const flicker=.86+Math.sin(elapsed*8.2+phase)*.08+Math.sin(elapsed*17.7+phase*.7)*.04;
+    light.intensity=.55*flicker;
+    flame.scale.y=.92+Math.sin(elapsed*12+phase)*.08;
+  });
+  if (state.dust) {
+    state.dust.rotation.y = elapsed*.006;
+    state.dust.position.y = Math.sin(elapsed*.1)*.03;
+  }
+  renderer.render(scene,camera);
+}
+
+function init() {
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, .08, 100);
+    camera.position.set(10.8,5.7,14.3);
+    state.targetTo.set(0,2.6,-.7);
+    setupRail();
+    resize();
+    applyVariant(0,false,1);
+    renderer.setAnimationLoop(animate);
+    window.__WEDDING_FLOWER_READY__ = true;
+  } catch (error) {
+    console.error(error);
+    fallback.hidden = false;
+    canvas.hidden = true;
+  }
+}
+
+previousButton.addEventListener('click',()=>nextVariant(-1));
+nextButton.addEventListener('click',()=>nextVariant(1));
+startButton.addEventListener('click',openStart);
+returnButton.addEventListener('click',closeStart);
+infoButton.addEventListener('click',openSheet);
+infoPanel.querySelectorAll('[data-close-sheet]').forEach(button=>button.addEventListener('click',closeSheet));
+soundButton.addEventListener('click',toggleSound);
+window.addEventListener('keydown',(event)=>{
+  if(event.key==='ArrowRight') nextVariant(1);
+  if(event.key==='ArrowLeft') nextVariant(-1);
+  if(event.key==='Escape') { if(infoPanel.classList.contains('open')) closeSheet(); if(startPanel.classList.contains('open')) closeStart(); }
+});
+window.addEventListener('resize',resize,{passive:true});
+window.addEventListener('pointerdown',pointerDown,{passive:true});
+window.addEventListener('pointermove',pointerMove,{passive:true});
+window.addEventListener('pointerup',pointerUp,{passive:true});
+window.addEventListener('pointercancel',pointerUp,{passive:true});
+
+init();
