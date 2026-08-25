@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#17130f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Biltmore Christmas Tree Works</title>
+  <meta name="description" content="35フィートの生木を選び、運び、立て、飾り、手入れし、撤収するまでを体験する4歳児向け3Dタッチゲーム。">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app" class="app" data-screen="title" aria-busy="true">
+    <canvas id="world" aria-label="ビルトモアのクリスマスツリー作業場"></canvas>
+    <div class="film-grain" aria-hidden="true"></div>
+    <div class="edge-shade" aria-hidden="true"></div>
+
+    <header class="hud-top">
+      <button id="homeButton" class="icon-button" type="button" aria-label="タイトルへ戻る">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4l8 7.2V20h-5.2v-5.6H9.2V20H4Z"/></svg>
+      </button>
+      <div class="chapter-strip" aria-live="polite">
+        <span id="chapterNumber" class="chapter-number">01</span>
+        <span class="chapter-divider"></span>
+        <span id="chapterPlace" class="chapter-place">BILTMORE ESTATE · ASHEVILLE</span>
+      </div>
+      <div class="hud-actions">
+        <button id="soundButton" class="icon-button" type="button" aria-label="音を切り替える" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9Zm12.4-1.7a6.4 6.4 0 0 1 0 9.4m2.7-12a10.1 10.1 0 0 1 0 14.6"/></svg>
+        </button>
+        <button id="pauseButton" class="icon-button" type="button" aria-label="メニューを開く">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M6 12h12M6 17h12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="interface">
+      <section id="titlePanel" class="title-panel">
+        <p class="title-eyebrow">A REAL TREE · A REAL JOB</p>
+        <h1><span>ほんものの</span>クリスマスツリー</h1>
+        <p class="title-lead">山の一本の木を、みんなで運んで、<br>大広間のツリーにしよう。</p>
+        <div class="title-facts" aria-label="ゲームの特徴">
+          <span><b>35 ft</b><small>生きたモミの木</small></span>
+          <span><b>17</b><small>つながる仕事</small></span>
+          <span><b>3D</b><small>手で動かす</small></span>
+        </div>
+        <button id="startButton" class="primary-button" type="button">
+          <span class="primary-button__disc" aria-hidden="true">▶</span>
+          <span><small>さいしょのしごと</small><strong>大広間をはかる</strong></span>
+          <span class="primary-button__arrow" aria-hidden="true">›</span>
+        </button>
+        <button id="continueButton" class="text-button" type="button" hidden>つづきから</button>
+      </section>
+
+      <section id="taskPanel" class="task-panel" hidden>
+        <div class="task-copy">
+          <p id="taskKicker" class="task-kicker">まず、はいるかたしかめよう</p>
+          <h2 id="taskTitle">大広間をはかる</h2>
+          <p id="taskInstruction">黄色いメジャーを、入口から天井までゆっくり引っぱろう。</p>
+        </div>
+        <div class="task-meter" aria-label="この仕事の進み具合">
+          <svg viewBox="0 0 52 52" aria-hidden="true">
+            <circle class="meter-track" cx="26" cy="26" r="21"></circle>
+            <circle id="meterArc" class="meter-arc" cx="26" cy="26" r="21"></circle>
+          </svg>
+          <b id="meterValue">0%</b>
+        </div>
+      </section>
+
+      <aside id="gestureCoach" class="gesture-coach" hidden aria-hidden="true">
+        <span id="gestureIcon" class="gesture-icon">☝︎</span>
+        <span id="gestureText">ひっぱる</span>
+      </aside>
+
+      <div id="actionDock" class="action-dock" hidden>
+        <button id="toolButton" class="tool-button" type="button" aria-label="道具を持つ">
+          <span id="toolIcon" class="tool-icon">↔</span>
+          <span id="toolLabel">メジャー</span>
+        </button>
+        <div class="dock-spacer"></div>
+        <button id="helpButton" class="help-button" type="button">みほん</button>
+        <button id="nextButton" class="next-button" type="button" disabled>
+          <span>できた</span><b>›</b>
+        </button>
+      </div>
+
+      <nav id="chapterRail" class="chapter-rail" aria-label="仕事の進行" hidden></nav>
+    </main>
+
+    <div id="chapterCard" class="chapter-card" hidden aria-live="polite">
+      <div class="chapter-card__number" id="cardNumber">01</div>
+      <div>
+        <p id="cardPlace">BANQUET HALL</p>
+        <h2 id="cardTitle">大広間をはかる</h2>
+        <span id="cardSubtitle">木が、扉と天井を通れるか調べます。</span>
+      </div>
+    </div>
+
+    <div id="successBurst" class="success-burst" hidden aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      <strong>できた！</strong>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <section id="menuModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+      <div class="modal__backdrop" data-close-modal></div>
+      <article class="modal__sheet">
+        <button class="modal__close" type="button" data-close-modal aria-label="閉じる">×</button>
+        <p class="modal__eyebrow">WORK LEDGER</p>
+        <h2 id="menuTitle">しごとのきろく</h2>
+        <p>どの章でも、途中の木の形・位置・飾りを保存します。</p>
+        <div class="menu-grid">
+          <button id="resumeButton" type="button">つづける</button>
+          <button id="restartChapterButton" type="button">この章をやりなおす</button>
+          <button id="resetButton" class="danger" type="button">最初から</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="finale" class="finale" hidden aria-live="polite">
+      <div class="finale__copy">
+        <p>THE BANQUET HALL TREE</p>
+        <h2>一本の木が、<br>大広間の光になりました。</h2>
+        <span>選ぶところから、片づけるところまで。ぜんぶ、あなたの仕事です。</span>
+        <button id="replayButton" class="primary-button" type="button">
+          <span class="primary-button__disc" aria-hidden="true">↺</span>
+          <span><small>もういちど</small><strong>木をむかえにいく</strong></span>
+          <span class="primary-button__arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
+    </section>
+
+    <div id="loading" class="loading" role="status">
+      <span class="loading__ring"></span>
+      <span>大広間と山を組み立てています</span>
+    </div>
+
+    <div id="webglError" class="webgl-error" hidden>
+      <h2>3Dを始められませんでした</h2>
+      <p>ネット接続とWebGLを確認して、もう一度開いてください。</p>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
