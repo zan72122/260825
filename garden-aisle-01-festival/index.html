@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#bd6d58" />
+  <meta name="description" content="4歳児向け3Dモバイルゲーム『おはなのウェディング』— 01 花の小道を、花以外まで華やかにした01派生・祝祭ピーク12案" />
+  <title>01 花の小道 — 祝祭ピーク12案</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app" data-tone="light">
+    <div id="stage" aria-label="華やかに完成したウェディング会場の花の小道">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <div id="skyWash" aria-hidden="true"></div>
+      <div id="grain" aria-hidden="true"></div>
+      <div id="vignette" aria-hidden="true"></div>
+    </div>
+
+    <header class="topbar">
+      <a class="back-link" href="../garden-aisle-peak/?v=1" aria-label="花の小道の完成ピーク比較へ戻る">
+        <span aria-hidden="true">←</span><b>01 花の小道</b>
+      </a>
+      <div class="brand">
+        <small>EVERYTHING CELEBRATES</small>
+        <strong>おはなのウェディング</strong>
+      </div>
+      <div class="top-actions">
+        <button id="viewButton" class="round-button" type="button" aria-label="視点を切り替える" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5.2 0-9.4 4.8-10 6.3a1.8 1.8 0 0 0 0 1.4C2.6 14.2 6.8 19 12 19s9.4-4.8 10-6.3a1.8 1.8 0 0 0 0-1.4C21.4 9.8 17.2 5 12 5Zm0 11.4A4.4 4.4 0 1 1 12 7.6a4.4 4.4 0 0 1 0 8.8Z"/></svg>
+        </button>
+        <button id="soundButton" class="round-button" type="button" aria-label="音を切り替える" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10H4Zm12.5 2a4.5 4.5 0 0 0-2.1-3.8v7.6a4.5 4.5 0 0 0 2.1-3.8Z"/></svg>
+        </button>
+        <button id="infoButton" class="round-button text-button" type="button" aria-label="この比較実装について">i</button>
+      </div>
+    </header>
+
+    <main class="scene-copy" aria-live="polite">
+      <div class="completion-badge"><i aria-hidden="true"></i><span>花以外まで、ぜんぶ祝祭</span></div>
+      <p class="scene-index"><b id="sceneNumber">A1</b><span>/12</span><em id="sceneKicker">ROSE-GOLD ORCHESTRA</em></p>
+      <h1 id="sceneTitle">ローズゴールド祝宴オーケストラ</h1>
+      <p id="sceneDescription">椅子、建物、木々、地面、参列者、演奏者まで、暖かな宝石色で一つの祝宴にします。</p>
+      <div id="featureList" class="feature-list" aria-label="華やかにした主な要素"></div>
+      <div class="view-label"><span id="viewLabel">ゲストの目線</span><small>画面を少し動かすと、近景・中景・遠景が動きます</small></div>
+    </main>
+
+    <button id="previousButton" class="nav-arrow previous" type="button" aria-label="前の祝祭案"><span>‹</span></button>
+    <button id="nextButton" class="nav-arrow next" type="button" aria-label="次の祝祭案"><span>›</span></button>
+
+    <button id="celebrateButton" class="celebrate-button" type="button" aria-label="みんなで拍手して祝う">
+      <span aria-hidden="true">♪</span><b>みんなで拍手！</b>
+    </button>
+
+    <footer class="scene-dock">
+      <p class="swipe-hint"><span aria-hidden="true">↔</span> 01から生まれた12の祝祭</p>
+      <div id="sceneRail" class="scene-rail" role="tablist" aria-label="花の小道01の祝祭ピーク12案"></div>
+      <p class="device-note">iPhone / iPad・たて / よこ</p>
+    </footer>
+
+    <section id="infoPanel" class="sheet" aria-hidden="true" aria-labelledby="infoTitle">
+      <button class="sheet-backdrop" data-close-sheet type="button" tabindex="-1" aria-label="閉じる"></button>
+      <div class="sheet-card" role="dialog" aria-modal="true">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <button class="sheet-close" data-close-sheet type="button" aria-label="閉じる">×</button>
+        <p class="sheet-kicker">01 / FESTIVE ENVIRONMENT STUDY</p>
+        <h2 id="infoTitle">花だけを増やさず、会場全体の一つひとつを祝祭へ変えました。</h2>
+        <p>12案すべてで、椅子、地面、建築、木、参列者、演奏者、照明、什器、サプライズ要素を変更しています。白一色、白薔薇中心、蘭枝中心の方向は使っていません。</p>
+        <dl>
+          <div><dt>左右</dt><dd>短いスワイプ、矢印、下の番号で12案を切り替え</dd></div>
+          <div><dt>視点</dt><dd>目のボタンで「ゲスト目線」と「装飾のそば」を切り替え</dd></div>
+          <div><dt>拍手</dt><dd>参列者が手を上げ、演奏者が動き、案ごとの祝祭演出が始まる</dd></div>
+          <div><dt>描画</dt><dd>画像背景ではなく、椅子・建物・人物・楽器・樹木・舗装までWebGLジオメトリで構成</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <div id="loading" aria-live="polite"><span></span><p>会場ぜんぶを祝祭にしています</p></div>
+    <div id="fallback" hidden>
+      <h2>3Dを読み込めませんでした</h2>
+      <p>ページを再読み込みしてください。</p>
+    </div>
+  </div>
+
+  <script>
+    window.__AISLE_FESTIVAL_READY__ = false;
+    window.setTimeout(() => {
+      if (!window.__AISLE_FESTIVAL_READY__) {
+        const fallback = document.querySelector('#fallback');
+        const loading = document.querySelector('#loading');
+        if (fallback) fallback.hidden = false;
+        if (loading) loading.hidden = true;
+      }
+    }, 7000);
+  </script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
