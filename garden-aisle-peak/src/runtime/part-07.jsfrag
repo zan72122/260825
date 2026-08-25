@@ -1,0 +1,171 @@
+    [[-.45,4.8,.76,.35],[.55,.7,.64,.26],[-.25,-4.3,.78,.3]].forEach(([x,z,sx,sy])=>{
+      addMesh(parent,new THREE.CircleGeometry(1,30),puddle,[x,.028,z],[-Math.PI/2,0,0],[sx,sy,1],false);
+    });
+  }
+  buildBrickFacade(parent,registry,{z:-17.5,seed:17+Number(config.number),tint:config.id==='winter-moon'?'#5e5653':'#73503e',trim:config.id==='ikebana-theatre'?0x373633:0x8b8174});
+  addBox(parent,[34,1.6,.7],[0,.8,-13.8],material(config.id==='winter-moon'?0x40504c:0x41543b,.94));
+}
+
+function buildLandscape(parent, config, animationState) {
+  const treeColor=config.id==='autumn-harvest'?0x6e6741:config.id==='winter-moon'?0x4b5752:0x40563c;
+  [[-9,-2,1.35],[8.7,-3,1.2],[-8,-10,1.12],[8,-11,1.42]].forEach(([x,z,scale],index)=>{
+    if(config.id==='winter-moon') buildBareTree(parent,[x,0,z],{scale,seed:90+index,color:0xb5b3ac});
+    else buildTree(parent,[x,0,z],{scale,seed:90+index,leaf:treeColor},animationState);
+  });
+  const hedge=material(config.id==='winter-moon'?0x56625e:0x3e543b,.94);
+  for(let x=-14;x<=14;x+=1.25) {
+    addSphere(parent,.6,[x,.48,-12.9],hedge,[1.15,.72,.9],8);
+  }
+}
+
+function buildSeats(parent, config) {
+  const rows=config.rows ?? 5;
+  for(let row=0;row<rows;row++) {
+    const z=5.1-row*2.45;
+    if(config.chair.kind==='bench') {
+      buildChair(parent,[-4.15,0,z],Math.PI,{...config.chair,kind:'bench'});
+      buildChair(parent,[4.15,0,z],Math.PI,{...config.chair,kind:'bench'});
+      continue;
+    }
+    if(config.chair.kind==='stool') {
+      [-5,-4.1,4.1,5].forEach((x,i)=>buildChair(parent,[x+(row%2)*.04,0,z+(i%2)*.08],Math.PI,{...config.chair,kind:'stool'}));
+      continue;
+    }
+    for(let col=0;col<3;col++) {
+      const x=3.2+col*1.05;
+      buildChair(parent,[-x-(row%2)*.04,0,z],Math.PI,config.chair);
+      buildChair(parent,[x+(row%2)*.05,0,z+.03],Math.PI,config.chair);
+    }
+  }
+}
+
+function buildBase(parent, config, registry, animationState) {
+  buildGround(parent,config,registry);
+  buildLandscape(parent,config,animationState);
+  buildSeats(parent,config);
+}
+
+function ironArch(parent, center=[0,2.35,-9.5], radius=2.32, options={}) {
+  const metal=material(options.color ?? 0x414541,.34,.68);
+  addRing(parent,center,radius,options.tube ?? .045,metal);
+  const feetX=radius;
+  [-feetX,feetX].forEach((x)=>{
+    addBox(parent,[.42,.055,.62],[center[0]+x,.03,center[2]],metal);
+    addBox(parent,[.48,.24,.34],[center[0]+x,.15,center[2]-.05],material(0x5a5750,.78,.12));
+  });
+  return {center:new THREE.Vector3(...center),radius};
+}
+
+function doubleArch(parent) {
+  const back=ironArch(parent,[0,2.45,-9.8],2.45,{color:0x8d7957,tube:.05});
+  ironArch(parent,[0,2.18,-8.95],2.15,{color:0x8d7957,tube:.042});
+  return back;
+}
+
+function floralIslands(batch, recipe, options={}) {
+  const rows=options.rows ?? 5;
+  for(let row=0;row<rows;row++) {
+    const z=4.45-row*2.45;
+    const progress=row/Math.max(1,rows-1);
+    const height=(options.startHeight ?? .55)+(options.endHeight ?? 1.2)*progress;
+    const count=Math.floor((options.startCount ?? 20)+(options.endCount ?? 15)*progress);
+    const sideOffset=options.sideOffset ?? 1.95;
+    batch.meadowCluster(new THREE.Vector3(-sideOffset,.02,z-.36),recipe,{count,width:.62+progress*.22,depth:.42,height});
+    batch.meadowCluster(new THREE.Vector3(sideOffset,.02,z-.28),recipe,{count:count-2,width:.64+progress*.2,depth:.4,height:height*.96});
+  }
+}
+
+function addToolZone(parent, type, batch=null) {
+  const zone=new THREE.Group();
+  zone.position.set(7.1,0,4.1);
+  parent.add(zone);
+  if(type==='garden') {
+    buildTrolley(zone,[0,0,0]);
+    buildWateringCan(zone,[-1.05,0,.15]);
+    const table=buildTable(zone,[.05,0,-1.25],{width:1.55,depth:.65,color:0x6f543e});
+    addBox(table,[.42,.035,.18],[-.3,.83,0],material(0x2f3330,.35,.55),[0,.18,0]);
+    addBox(table,[.3,.025,.11],[.3,.83,.05],material(0x8f5d3d,.72));
+  } else if(type==='rose') {
+    buildRoadCase(zone,[0,0,0],{color:0x45423c});
+    buildLantern(zone,[-1.05,0,.15],{color:0x826b45,size:.46});
+    addBox(zone,[.6,.22,.4],[.7,.11,.1],material(0x5e5c55,.8));
+  } else if(type==='water') {
+    buildWateringCan(zone,[-.65,0,.1],{color:0x737d7a});
+    buildWateringCan(zone,[.15,0,-.15],{color:0x9ba5a1});
+    buildTrolley(zone,[.15,0,-1.3]);
+  } else if(type==='rigging') {
+    buildRoadCase(zone,[0,0,0]);
+    buildLadder(zone,[-1.0,0,-.2],{height:2.15,rotationY:.1});
+    addCylinder(zone,.42,.42,.22,[.85,.11,-.05],material(0x38403e,.45,.55),22);
+    addRing(zone,[.85,.24,-.05],.31,.018,material(0x646967,.35,.7),[Math.PI/2,0,0]);
+  } else if(type==='candle') {
+    buildRoadCase(zone,[0,0,-.3],{color:0x4a3b34});
+    buildFireExtinguisher(zone,[-.95,0,.15]);
+    addBox(zone,[.7,.08,.18],[.65,.55,.05],material(0x8d6a42,.32,.72),[0,.22,0]);
+  } else if(type==='wind') {
+    buildRoadCase(zone,[.1,0,-.5],{color:0x5e5140});
+    addBox(zone,[.75,.28,.45],[-.85,.14,.2],material(0x777064,.82));
+    addRing(zone,[.65,.1,.3],.34,.026,material(0x6f5938,.78),[Math.PI/2,0,0]);
+  } else if(type==='orchard') {
+    buildWovenBasket(zone,[-.8,0,.2]);
+    buildWateringCan(zone,[.15,0,.15],{color:0x7c867f});
+    addBox(zone,[1.1,.6,.75],[.15,.3,-.95],material(0x806044,.91));
+  } else if(type==='harvest') {
+    buildCopperBowl(zone,[-.8,0,.15]);
+    buildRoadCase(zone,[.25,0,-.4],{color:0x56473a});
+    addBox(zone,[.75,.055,.28],[.4,.78,.2],material(0x4d382b,.92),[0,.2,0]);
+  } else if(type==='winter') {
+    buildRoadCase(zone,[.2,0,-.3],{color:0x65706f});
+    addCylinder(zone,.34,.38,.65,[-.8,.325,.1],material(0x9ca5a3,.66,.12),24);
+    addBox(zone,[.55,.22,.4],[.75,.11,.2],material(0x6e7776,.72));
+  } else if(type==='ikebana') {
+    buildShallowBasin(zone,[-.8,0,.1],{color:0x2e302e});
+    buildTable(zone,[.2,0,-.45],{width:1.45,depth:.58,color:0x352a24});
+    addCylinder(zone,.15,.15,.04,[.05,.83,-.45],material(0x292c29,.35,.58),24);
+    for(let x=-.08;x<=.18;x+=.045) addCylinder(zone,.005,.005,.13,[x,.91,-.45],material(0x8c8d85,.25,.74),5);
+  }
+  if(batch) batch.flush(zone);
+  return zone;
+}
+
+function buildGardenCathedral(parent, config, registry, animationState) {
+  buildBase(parent,config,registry,animationState);
+  const batch=new FloralBatch({seed:101,leafColors:[0x3f5f3e,0x718260,0x879778]});
+  const arch=ironArch(parent);
+  const recipe=[
+    {type:'rose',color:0xf0dfd7,size:.28},{type:'peony',color:0xd99b9d,size:.32},
+    {type:'ranunculus',color:0xe4c88e,size:.23},{type:'daisy',color:0x9daeb5,size:.18,petals:7}
+  ];
+  floralIslands(batch,recipe,{rows:5,startHeight:.46,endHeight:.72,startCount:18,endCount:17});
+  batch.arch(arch.center,arch.radius,recipe,{count:92,start:.08,end:Math.PI-.02,depthJitter:.2});
+  for(let side of [-1,1]) {
+    for(let i=0;i<5;i++) {
+      const base=new THREE.Vector3(side*(2.15+i*.06),.06,-7.7-i*.15);
+      batch.spike(base,1.25+i*.18,[0x91a9bb,0xaab8c3],{type:i%2?'foxglove':'delphinium',scale:1.1});
+    }
+  }
+  buildUrn(parent,[-3.0,0,-8.9],{color:0x7e7466});
+  buildUrn(parent,[3.0,0,-8.9],{color:0x7e7466});
+  batch.meadowCluster(new THREE.Vector3(-3,.95,-8.9),recipe,{count:32,width:1.0,depth:.75,height:1.1,baseY:0});
+  batch.meadowCluster(new THREE.Vector3(3,.95,-8.9),recipe,{count:30,width:1.0,depth:.7,height:1.05,baseY:0});
+  addGroundPetals(parent,{seed:110,count:105,colors:[0xf0dfd7,0xe7c7bd],length:18,width:2.2,z:-1.5});
+  batch.flush(parent);
+  addToolZone(parent,'garden');
+}
+
+function buildIvoryRoseHall(parent,config,registry,animationState) {
+  buildBase(parent,config,registry,animationState);
+  const runner=material(0xe9e4da,.92);
+  addPlane(parent,2.25,22,[0,.03,-3.6],runner);
+  const batch=new FloralBatch({seed:202,leafColors:[0x50614f,0x7a8874]});
+  const arch=doubleArch(parent);
+  const ivory=[
+    {type:'rose',color:0xf4eee4,size:.3},{type:'peony',color:0xe8e2d7,size:.33},
+    {type:'ranunculus',color:0xf6f1e7,size:.22},{type:'hydrangea',color:0xf0ede6,colors:[0xf3f0e8,0xdedbd2],size:.3}
+  ];
+  batch.arch(arch.center,arch.radius,ivory,{count:112,start:.05,end:Math.PI-.03,depthJitter:.26});
+  batch.arch(new THREE.Vector3(0,2.18,-8.95),2.15,ivory,{count:72,start:.38,end:Math.PI-.18,depthJitter:.18});
+  for(let row=0;row<6;row++) {
+    const z=4.7-row*2.25;
+    const size=.62+row*.08;
+    batch.hydrangeaBank(new THREE.Vector3(-1.84,.02,z-.25),{count:7,width:size,depth:.42,colors:[0xf3f0e8,0xe1ded5,0xd2d0c8]});
