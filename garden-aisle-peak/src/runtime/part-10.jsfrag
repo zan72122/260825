@@ -1,0 +1,241 @@
+  decoratorView:false,
+  pointerDown:false,
+  pointerId:null,
+  pointerStart:new THREE.Vector2(),
+  pointerLast:new THREE.Vector2(),
+  cameraNudge:new THREE.Vector2(),
+  cameraNudgeTarget:new THREE.Vector2(),
+  cameraFrom:new THREE.Vector3(),
+  cameraTo:new THREE.Vector3(),
+  targetFrom:new THREE.Vector3(),
+  targetTo:new THREE.Vector3(),
+  transitionStart:performance.now(),
+  transitionDuration:950,
+  reducedMotion:window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  soundOn:false,
+  audioContext:null,
+  candles:[],
+  sway:[],
+  clock:new THREE.Clock(),
+  firstFrame:true
+};
+
+let renderer;
+let scene;
+let camera;
+let world;
+let lightRoot;
+let textures=new TextureRegistry();
+
+function parseInitialScene() {
+  const value=location.hash.replace(/^#/,'');
+  const index=SCENES.findIndex((item)=>item.id===value || item.number===value);
+  return index>=0?index:0;
+}
+
+function setupRail() {
+  SCENES.forEach((item,index)=>{
+    const button=document.createElement('button');
+    button.type='button';
+    button.role='tab';
+    button.className='scene-tab';
+    button.setAttribute('aria-label',`${item.number} ${item.title}`);
+    button.setAttribute('aria-selected',index===state.index?'true':'false');
+    button.innerHTML=`<b>${item.number}</b><strong>${item.short}</strong><span class="palette" aria-hidden="true">${item.paletteCss.map((color)=>`<i style="background:${color}"></i>`).join('')}</span>`;
+    button.addEventListener('click',()=>applyScene(index,true,index>=state.index?1:-1));
+    sceneRail.appendChild(button);
+  });
+}
+
+function updateCopy(config) {
+  app.dataset.tone=config.tone;
+  document.documentElement.style.setProperty('--accent',config.accent);
+  document.documentElement.style.setProperty('--accent-soft',config.accentSoft);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content',`#${new THREE.Color(config.background).getHexString()}`);
+  sceneNumber.textContent=config.number;
+  sceneKicker.textContent=config.kicker;
+  sceneTitle.textContent=config.title;
+  sceneDescription.textContent=config.description;
+  speciesList.replaceChildren(...config.species.map((name)=>{
+    const chip=document.createElement('span');
+    chip.textContent=name;
+    return chip;
+  }));
+  Array.from(sceneRail.children).forEach((button,index)=>{
+    const selected=index===state.index;
+    button.setAttribute('aria-selected',String(selected));
+    if(selected) button.scrollIntoView({block:'nearest',inline:'center',behavior:state.reducedMotion?'auto':'smooth'});
+  });
+}
+
+function configureLights(config) {
+  if(lightRoot) {
+    scene.remove(lightRoot);
+    lightRoot.traverse((child)=>child.dispose?.());
+  }
+  lightRoot=new THREE.Group();
+  scene.add(lightRoot);
+  const hemi=new THREE.HemisphereLight(config.sky,config.groundLight,config.tone==='dark'?.72:1.42);
+  lightRoot.add(hemi);
+  const sun=new THREE.DirectionalLight(config.sun,config.sunIntensity);
+  sun.position.set(...config.sunPos);
+  sun.castShadow=true;
+  sun.shadow.mapSize.set(innerWidth<700?1024:1536,innerWidth<700?1024:1536);
+  sun.shadow.camera.left=-13;
+  sun.shadow.camera.right=13;
+  sun.shadow.camera.top=11;
+  sun.shadow.camera.bottom=-7;
+  sun.shadow.camera.near=.5;
+  sun.shadow.camera.far=38;
+  sun.shadow.bias=-.00018;
+  sun.shadow.normalBias=.025;
+  lightRoot.add(sun);
+  if(config.id==='hydrangea-river') {
+    const cool=new THREE.DirectionalLight(0xc9e4e5,.7);
+    cool.position.set(8,5,8);
+    lightRoot.add(cool);
+  }
+  if(config.id==='wisteria-cloud') {
+    const fill=new THREE.DirectionalLight(0xe7deef,.6);
+    fill.position.set(7,8,2);
+    lightRoot.add(fill);
+  }
+  if(config.id==='ikebana-theatre') {
+    const fill=new THREE.DirectionalLight(0xaebcb5,.55);
+    fill.position.set(6,5,7);
+    lightRoot.add(fill);
+  }
+}
+
+function getResponsiveView(config) {
+  const key=state.decoratorView?'decorator':'guest';
+  const source=config.view[key];
+  const position=new THREE.Vector3(...source.position);
+  const target=new THREE.Vector3(...source.target);
+  const portrait=innerHeight>innerWidth*1.08;
+  if(portrait) {
+    position.z+=3.7;
+    position.y+=.35;
+    target.y+=.12;
+    target.x+=state.decoratorView?-.35:.28;
+  }
+  if(innerWidth<520) position.z+=.8;
+  return {position,target,fov:source.fov+(portrait?4.5:0)};
+}
+
+function rebuildWorld(config) {
+  state.candles=[];
+  state.sway=[];
+  textures.dispose();
+  textures=new TextureRegistry();
+  if(world) {
+    scene.remove(world);
+    disposeObject(world);
+  }
+  world=buildPeakScene(config,textures,state);
+  scene.add(world);
+}
+
+function applyScene(index,animate=true,direction=1) {
+  state.index=(index+SCENES.length)%SCENES.length;
+  const config=SCENES[state.index];
+  app.classList.add('switching');
+  updateCopy(config);
+  scene.background=new THREE.Color(config.background);
+  scene.fog=new THREE.FogExp2(config.fog,config.fogDensity);
+  renderer.toneMappingExposure=config.exposure;
+  configureLights(config);
+  rebuildWorld(config);
+  const view=getResponsiveView(config);
+  camera.fov=view.fov;
+  camera.updateProjectionMatrix();
+  state.cameraFrom.copy(camera.position);
+  state.targetFrom.copy(state.targetTo.lengthSq()?state.targetTo:view.target);
+  state.cameraTo.copy(view.position);
+  state.targetTo.copy(view.target);
+  if(!animate || state.reducedMotion) {
+    camera.position.copy(view.position);
+    camera.lookAt(view.target);
+    state.transitionStart=-Infinity;
+  } else {
+    state.cameraFrom.x+=direction*.62;
+    state.cameraFrom.z+=1.05;
+    state.transitionStart=performance.now();
+  }
+  state.cameraNudge.set(0,0);
+  state.cameraNudgeTarget.set(0,0);
+  history.replaceState(null,'',`#${config.id}`);
+  window.setTimeout(()=>app.classList.remove('switching'),state.reducedMotion?0:340);
+  playChime(310+state.index*18,.05);
+}
+
+function nextScene(direction=1) {
+  applyScene(state.index+direction,true,direction);
+}
+
+function toggleView() {
+  state.decoratorView=!state.decoratorView;
+  viewButton.setAttribute('aria-pressed',String(state.decoratorView));
+  viewLabel.textContent=state.decoratorView?'装花スタッフの目線':'ゲストの目線';
+  const view=getResponsiveView(SCENES[state.index]);
+  state.cameraFrom.copy(camera.position);
+  state.targetFrom.copy(state.targetTo);
+  state.cameraTo.copy(view.position);
+  state.targetTo.copy(view.target);
+  camera.fov=view.fov;
+  camera.updateProjectionMatrix();
+  state.transitionStart=performance.now();
+  playChime(state.decoratorView?420:360,.045);
+}
+
+function pointerDown(event) {
+  if(event.target.closest('button,a,.sheet')) return;
+  state.pointerDown=true;
+  state.pointerId=event.pointerId;
+  state.pointerStart.set(event.clientX,event.clientY);
+  state.pointerLast.copy(state.pointerStart);
+  canvas.setPointerCapture?.(event.pointerId);
+}
+
+function pointerMove(event) {
+  const nx=(event.clientX/innerWidth)*2-1;
+  const ny=(event.clientY/innerHeight)*2-1;
+  state.cameraNudgeTarget.set(nx*.42,-ny*.19);
+  if(!state.pointerDown || event.pointerId!==state.pointerId) return;
+  state.pointerLast.set(event.clientX,event.clientY);
+}
+
+function pointerUp(event) {
+  if(!state.pointerDown || (state.pointerId!==null && event.pointerId!==state.pointerId)) return;
+  state.pointerDown=false;
+  state.pointerId=null;
+  const dx=event.clientX-state.pointerStart.x;
+  const dy=event.clientY-state.pointerStart.y;
+  if(Math.abs(dx)>38 && Math.abs(dx)>Math.abs(dy)*1.12) nextScene(dx<0?1:-1);
+}
+
+function ensureAudio() {
+  if(!state.audioContext) state.audioContext=new (window.AudioContext||window.webkitAudioContext)();
+  if(state.audioContext.state==='suspended') state.audioContext.resume();
+}
+
+function playChime(frequency=330,volume=.05) {
+  if(!state.soundOn) return;
+  ensureAudio();
+  const now=state.audioContext.currentTime;
+  [1,1.25,1.5].forEach((ratio,index)=>{
+    const oscillator=state.audioContext.createOscillator();
+    const gain=state.audioContext.createGain();
+    oscillator.type=index===0?'sine':'triangle';
+    oscillator.frequency.setValueAtTime(frequency*ratio,now+index*.035);
+    gain.gain.setValueAtTime(.0001,now);
+    gain.gain.exponentialRampToValueAtTime(volume/(index+1),now+.025+index*.035);
+    gain.gain.exponentialRampToValueAtTime(.0001,now+.38+index*.07);
+    oscillator.connect(gain).connect(state.audioContext.destination);
+    oscillator.start(now+index*.035);
+    oscillator.stop(now+.48+index*.07);
+  });
+}
+
+function toggleSound() {
+  state.soundOn=!state.soundOn;
