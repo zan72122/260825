@@ -1,0 +1,110 @@
+  soundButton.setAttribute('aria-pressed',String(state.soundOn));
+  if(state.soundOn) {
+    ensureAudio();
+    playChime(330,.06);
+  }
+}
+
+function openInfo() {
+  infoPanel.setAttribute('aria-hidden','false');
+  infoPanel.classList.add('open');
+  infoPanel.querySelector('.sheet-close')?.focus();
+}
+
+function closeInfo() {
+  infoPanel.setAttribute('aria-hidden','true');
+  infoPanel.classList.remove('open');
+  infoButton.focus();
+}
+
+function resize() {
+  if(!renderer||!camera) return;
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,innerWidth<700?1.35:1.65));
+  renderer.setSize(innerWidth,innerHeight,false);
+  camera.aspect=innerWidth/innerHeight;
+  const view=getResponsiveView(SCENES[state.index]);
+  camera.fov=view.fov;
+  camera.updateProjectionMatrix();
+  state.cameraTo.copy(view.position);
+  state.targetTo.copy(view.target);
+  if(state.transitionStart===-Infinity) {
+    camera.position.copy(view.position);
+    camera.lookAt(view.target);
+  }
+}
+
+function animate(now) {
+  const elapsed=state.clock.getElapsedTime();
+  const raw=state.transitionStart===-Infinity?1:THREE.MathUtils.clamp((now-state.transitionStart)/state.transitionDuration,0,1);
+  const eased=1-Math.pow(1-raw,4);
+  const position=state.cameraFrom.clone().lerp(state.cameraTo,eased);
+  const target=state.targetFrom.clone().lerp(state.targetTo,eased);
+  state.cameraNudge.lerp(state.cameraNudgeTarget,.045);
+  position.x+=state.cameraNudge.x;
+  position.y+=state.cameraNudge.y+Math.sin(elapsed*.22)*.012;
+  target.x+=state.cameraNudge.x*.12;
+  target.y+=state.cameraNudge.y*.06;
+  camera.position.copy(position);
+  camera.lookAt(target);
+  state.candles.forEach(({light,flame,phase})=>{
+    const flicker=.9+Math.sin(elapsed*8.1+phase)*.06+Math.sin(elapsed*17.2+phase*.6)*.035;
+    light.intensity=.42*flicker;
+    flame.scale.y=.92+Math.sin(elapsed*11.4+phase)*.07;
+  });
+  state.sway.forEach(({object,amount,phase})=>{
+    object.rotation.z=Math.sin(elapsed*.48+phase)*amount;
+    object.rotation.x=Math.cos(elapsed*.36+phase)*amount*.4;
+  });
+  renderer.render(scene,camera);
+  if(state.firstFrame) {
+    state.firstFrame=false;
+    loading.classList.add('ready');
+    window.__GARDEN_PEAK_READY__=true;
+  }
+}
+
+function init() {
+  try {
+    renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(38,innerWidth/innerHeight,.08,110);
+    state.index=parseInitialScene();
+    setupRail();
+    const initial=SCENES[state.index];
+    const view=getResponsiveView(initial);
+    camera.position.copy(view.position);
+    state.targetTo.copy(view.target);
+    resize();
+    applyScene(state.index,false,1);
+    renderer.setAnimationLoop(animate);
+  } catch(error) {
+    console.error(error);
+    fallback.hidden=false;
+    loading.hidden=true;
+    canvas.hidden=true;
+  }
+}
+
+previousButton.addEventListener('click',()=>nextScene(-1));
+nextButton.addEventListener('click',()=>nextScene(1));
+viewButton.addEventListener('click',toggleView);
+soundButton.addEventListener('click',toggleSound);
+infoButton.addEventListener('click',openInfo);
+infoPanel.querySelectorAll('[data-close-sheet]').forEach((button)=>button.addEventListener('click',closeInfo));
+window.addEventListener('pointerdown',pointerDown,{passive:true});
+window.addEventListener('pointermove',pointerMove,{passive:true});
+window.addEventListener('pointerup',pointerUp,{passive:true});
+window.addEventListener('pointercancel',pointerUp,{passive:true});
+window.addEventListener('resize',resize,{passive:true});
+window.addEventListener('keydown',(event)=>{
+  if(event.key==='ArrowRight') nextScene(1);
+  if(event.key==='ArrowLeft') nextScene(-1);
+  if(event.key==='v') toggleView();
+  if(event.key==='Escape' && infoPanel.classList.contains('open')) closeInfo();
+});
+
+init();
